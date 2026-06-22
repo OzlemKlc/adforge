@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AdForge — Tek fotoğraf, 10 kazanan reklam</title>
+<meta name="description" content="DTC markaları için UGC reklam varyant motoru. Tek ürün fotoğrafı + brief → 10 reklam varyantı + performans raporu." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0805; --bg2:#0f0b06; --panel:#161009; --panel2:#1d150b;
+  --line:#2c2114; --line2:#3a2c19;
+  --ink:#f6efe3; --mut:#a99b86; --dim:#6f6354;
+  --amber:#ff9d3c; --orange:#ff6a1a; --hot:#ff4326; --spark:#ffd79a; --ember:#c2410c;
+  --wa:#25d366;
+  --grad:linear-gradient(105deg,#ffd79a 0%,#ff9d3c 35%,#ff6a1a 70%,#ff4326 100%);
+  --grad-soft:linear-gradient(135deg,rgba(255,157,60,.18),rgba(255,67,38,.06));
+  --r:16px; --maxw:1240px;
+  --disp:"Bricolage Grotesque",serif; --body:"Hanken Grotesk",sans-serif; --mono:"JetBrains Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--orange);color:#1a0d04}
+::-webkit-scrollbar{width:11px}::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--ember);border-radius:6px;border:3px solid var(--bg)}
+a{color:inherit;text-decoration:none}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:radial-gradient(60vw 50vh at 78% -5%,rgba(255,106,26,.20),transparent 60%),radial-gradient(50vw 45vh at 10% 8%,rgba(255,67,38,.12),transparent 55%),radial-gradient(70vw 60vh at 50% 120%,rgba(194,65,12,.16),transparent 60%)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:linear-gradient(to bottom,rgba(10,8,5,.85),rgba(10,8,5,.55));border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:66px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:800;font-size:20px;letter-spacing:-.02em}
+.logo .spark{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:var(--grad);color:#1a0d04;font-size:15px;box-shadow:0 0 18px rgba(255,106,26,.55)}
+.logo b{color:var(--amber)}
+.navlinks{display:flex;gap:26px;align-items:center;font-size:14px;color:var(--mut)}
+.navlinks a{transition:color .2s}.navlinks a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--body);font-weight:700;font-size:14px;padding:11px 20px;border-radius:10px;cursor:pointer;border:0;transition:transform .15s,box-shadow .25s}
+.btn-primary{background:var(--grad);color:#1a0d04;box-shadow:0 6px 24px rgba(255,106,26,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(255,106,26,.5)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.btn-ghost:hover{border-color:var(--amber);color:var(--amber)}
+.navlinks .nav-cta{padding:9px 16px}
+.lang{display:flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;font-family:var(--mono);font-size:12px}
+.lang button{background:transparent;color:var(--mut);border:0;padding:6px 11px;cursor:pointer;font-family:inherit;transition:all .2s}
+.lang button.on{background:var(--grad);color:#1a0d04;font-weight:700}
+@media(max-width:900px){.navlinks .hidem{display:none}}
+
+/* HERO */
+.hero{position:relative;padding:74px 0 40px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);padding:7px 13px;border:1px solid var(--line2);border-radius:100px;background:rgba(255,157,60,.06);margin-bottom:24px}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:bls 1.6s infinite}
+@keyframes bls{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(40px,6vw,76px);line-height:.98;letter-spacing:-.03em;margin-bottom:22px}
+.molten{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{font-size:clamp(16px,1.5vw,19px);color:var(--mut);max-width:520px;margin-bottom:30px}
+.hero p.lead b{color:var(--ink);font-weight:600}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:30px}
+.btn-lg{padding:15px 28px;font-size:15px;border-radius:12px}
+.btn-wa{background:var(--wa);color:#04210f}
+.btn-wa:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(37,211,102,.4)}
+.trust{display:flex;gap:26px;flex-wrap:wrap;font-size:13px;color:var(--dim)}
+.trust b{color:var(--ink);font-family:var(--mono);font-weight:700}
+.trust .it{display:flex;flex-direction:column;gap:1px}
+.forge{position:relative}
+.forge-src{position:relative;width:150px;margin:0 auto 6px;z-index:3}
+.src-card{aspect-ratio:3/4;border-radius:14px;border:1px solid var(--line2);overflow:hidden;position:relative;background:linear-gradient(160deg,#2a1d10,#15100a);box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.src-card .tagimg{position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,rgba(255,215,154,.5),transparent 45%),conic-gradient(from 200deg at 60% 60%,#ff9d3c44,#ff432622,#1d150b 70%)}
+.src-card .bottle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:88px;border-radius:12px 12px 8px 8px;background:linear-gradient(180deg,#ffd79a,#ff9d3c 55%,#ff6a1a);box-shadow:0 6px 18px rgba(255,106,26,.5),inset 0 2px 6px rgba(255,255,255,.5)}
+.src-card .cap{position:absolute;left:50%;top:calc(50% - 50px);transform:translateX(-50%);width:20px;height:14px;border-radius:4px;background:#2a1d10}
+.src-label{text-align:center;font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em}
+.forge-arrow{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--amber);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin:10px 0 14px;opacity:0;animation:fade .6s .5s forwards}
+.forge-arrow .ln{height:1px;width:40px;background:linear-gradient(90deg,transparent,var(--amber))}
+.forge-arrow .ln.r{background:linear-gradient(90deg,var(--amber),transparent)}
+@keyframes fade{to{opacity:1}}
+.grid20{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;position:relative}
+.vtile{aspect-ratio:9/16;border-radius:9px;position:relative;overflow:hidden;border:1px solid var(--line);opacity:0;transform:translateY(14px) scale(.9);animation:pop .5s forwards;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+@keyframes pop{to{opacity:1;transform:none}}
+.vtile .scene{position:absolute;inset:0}
+.vtile .face{position:absolute;left:50%;top:34%;transform:translateX(-50%);width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.7),rgba(255,255,255,.15));border:1px solid rgba(255,255,255,.25)}
+.vtile .subs{position:absolute;left:6px;right:6px;bottom:9px;height:5px;border-radius:3px;background:rgba(255,255,255,.85)}
+.vtile .subs::after{content:"";position:absolute;left:0;top:7px;width:62%;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
+.vtile .sc{position:absolute;top:5px;right:5px;font-family:var(--mono);font-weight:700;font-size:10px;padding:1px 5px;border-radius:5px;background:rgba(10,8,5,.7);color:var(--spark);backdrop-filter:blur(4px)}
+.vtile.win{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber),0 10px 30px rgba(255,106,26,.5);z-index:2}
+.vtile.win .flag{position:absolute;top:5px;left:5px;font-size:9px;font-weight:800;font-family:var(--mono);padding:1px 5px;border-radius:5px;background:var(--grad);color:#1a0d04}
+.vtile.win .sc{background:var(--grad);color:#1a0d04}
+.src-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vtile .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.05)}
+.vtile .shade{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,5,.55),transparent 42%)}
+.vtile .tint{position:absolute;inset:0;pointer-events:none}
+.vtile .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:rgba(10,8,5,.42);backdrop-filter:blur(3px);display:grid;place-items:center;border:1px solid rgba(255,255,255,.45);opacity:.92}
+.vtile .play::after{content:"";border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:3px}
+/* canli video duvari: her kare yavasca zoom/pan -> oynayan reklam hissi */
+.vtile .ph{will-change:transform}
+@keyframes kb1{from{transform:scale(1.06)}to{transform:scale(1.20) translate(-3%,-2%)}}
+@keyframes kb2{from{transform:scale(1.12) translate(2%,1%)}to{transform:scale(1.22) translate(-2%,-3%)}}
+@keyframes kb3{from{transform:scale(1.18) translate(-2%,2%)}to{transform:scale(1.07) translate(2%,-1%)}}
+.vtile .ph.kb1{animation:kb1 9s ease-in-out infinite alternate}
+.vtile .ph.kb2{animation:kb2 11s ease-in-out infinite alternate}
+.vtile .ph.kb3{animation:kb3 10s ease-in-out infinite alternate}
+.vtile .vdur{position:absolute;left:6px;bottom:7px;font-family:var(--mono);font-size:9px;font-weight:700;color:#fff;background:rgba(10,8,5,.55);padding:1px 6px;border-radius:5px;backdrop-filter:blur(3px);letter-spacing:.04em;display:flex;align-items:center;gap:3px}
+.vtile .vdur::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--hot);box-shadow:0 0 6px var(--hot);animation:bls 1.4s infinite}
+@media (prefers-reduced-motion:reduce){.vtile .ph{animation:none!important}}
+
+/* band */
+.band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg2);overflow:hidden;margin-top:34px}
+.band-row{display:flex;white-space:nowrap;animation:slide 26s linear infinite;width:max-content}
+.band-row .it{display:flex;align-items:center;gap:14px;padding:18px 34px;font-family:var(--disp);font-weight:700;font-size:18px;color:var(--mut)}
+.band-row .it b{color:var(--amber)}.band-row .it .sep{color:var(--ember)}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* logos strip */
+.logos{padding:46px 0;border-bottom:1px solid var(--line)}
+.logos .lab{text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:26px}
+.logos .row{display:flex;justify-content:center;align-items:center;gap:48px;flex-wrap:wrap;opacity:.7}
+.logos .row span{font-family:var(--disp);font-weight:700;font-size:22px;color:var(--mut);letter-spacing:-.01em;filter:grayscale(1)}
+
+/* sections */
+section{padding:96px 0;position:relative}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:16px;display:block}
+h2{font-family:var(--disp);font-weight:800;font-size:clamp(30px,4vw,50px);line-height:1.04;letter-spacing:-.025em;max-width:760px}
+.sec-lead{color:var(--mut);font-size:17px;max-width:620px;margin-top:18px}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.center{text-align:center;margin:0 auto}
+.center h2,.center .sec-lead{margin-left:auto;margin-right:auto}
+
+.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px}
+.prob{padding:26px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.prob .n{font-family:var(--mono);font-size:12px;color:var(--ember)}
+.prob h3{font-family:var(--disp);font-weight:700;font-size:21px;margin:12px 0 8px;letter-spacing:-.01em}
+.prob p{color:var(--mut);font-size:14.5px}
+
+.pipe{margin-top:54px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;position:relative}
+.pipe::before{content:"";position:absolute;top:38px;left:8%;right:8%;height:2px;background:linear-gradient(90deg,var(--ember),var(--amber),var(--hot));opacity:.4;z-index:0}
+.step{position:relative;z-index:1;text-align:center}
+.step .orb{width:76px;height:76px;margin:0 auto 16px;border-radius:18px;display:grid;place-items:center;font-size:28px;background:var(--panel2);border:1px solid var(--line2);box-shadow:0 8px 24px rgba(0,0,0,.45);transition:transform .3s}
+.step:hover .orb{transform:translateY(-6px);border-color:var(--amber)}
+.step .k{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:.1em}
+.step h4{font-family:var(--disp);font-weight:700;font-size:17px;margin:6px 0 6px}
+.step p{font-size:13px;color:var(--mut);padding:0 6px}
+
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:48px}
+.col{border-radius:var(--r);padding:30px;border:1px solid var(--line)}
+.col.old{background:var(--panel);opacity:.9}
+.col.new{background:linear-gradient(160deg,rgba(255,157,60,.10),rgba(255,67,38,.03));border-color:var(--amber)}
+.col h3{font-family:var(--disp);font-weight:700;font-size:22px;margin-bottom:6px}
+.col .who{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:20px}
+.col.new .who{color:var(--amber)}
+.col ul{list-style:none;display:flex;flex-direction:column;gap:13px}
+.col li{display:flex;gap:11px;font-size:14.5px;color:var(--mut);align-items:flex-start}
+.col li .ic{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-size:12px;font-weight:700}
+.col.old li .ic{background:rgba(248,113,113,.12);color:#f87171}
+.col.new li .ic{background:var(--grad);color:#1a0d04}.col.new li{color:var(--ink)}
+
+/* testimonials */
+.tsts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:48px}
+.tst{padding:28px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);display:flex;flex-direction:column;gap:18px}
+.tst .q{font-size:16px;color:var(--ink);line-height:1.55}
+.tst .q::before{content:"“";font-family:var(--disp);font-size:40px;color:var(--ember);line-height:0;vertical-align:-12px;margin-right:4px}
+.tst .who{display:flex;align-items:center;gap:12px;margin-top:auto}
+.tst .av{width:40px;height:40px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-family:var(--disp);font-weight:800;color:#1a0d04}
+.tst .nm{font-weight:700;font-size:14px}.tst .rl{font-size:12px;color:var(--dim)}
+
+/* cost */
+.cost{margin-top:48px;display:grid;gap:18px;max-width:820px}
+.cbar{display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:center}
+.cbar .lbl{font-size:14px;color:var(--mut)}.cbar .lbl b{display:block;color:var(--ink);font-family:var(--disp);font-size:17px}
+.cbar .track{height:46px;border-radius:10px;background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden}
+.cbar .fill{height:100%;border-radius:9px;display:flex;align-items:center;padding:0 16px;font-family:var(--mono);font-weight:700;font-size:14px;width:0;transition:width 1.3s cubic-bezier(.2,.7,.2,1)}
+.cbar.old .fill{background:linear-gradient(90deg,#7c2d12,#9a3412);color:var(--ink)}
+.cbar.new .fill{background:var(--grad);color:#1a0d04}
+
+/* features bento */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:170px;gap:16px;margin-top:48px}
+.cell{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:22px;position:relative;overflow:hidden;transition:border-color .3s,transform .3s}
+.cell:hover{border-color:var(--line2);transform:translateY(-3px)}
+.cell .em{font-size:24px;margin-bottom:12px}
+.cell h4{font-family:var(--disp);font-weight:700;font-size:18px;margin-bottom:7px;letter-spacing:-.01em}
+.cell p{font-size:13.5px;color:var(--mut)}
+.cell.big{grid-column:span 2;grid-row:span 2;background:linear-gradient(160deg,var(--panel2),var(--panel));display:flex;flex-direction:column;justify-content:space-between}
+.cell.big .huge{font-family:var(--disp);font-weight:800;font-size:clamp(44px,7vw,84px);line-height:.9;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cell.wide{grid-column:span 2}
+.cell .corner{position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;border-radius:50%;background:var(--grad-soft);filter:blur(10px)}
+
+/* pricing */
+.bill{display:flex;justify-content:center;gap:0;margin:30px auto 0;border:1px solid var(--line2);border-radius:10px;width:max-content;overflow:hidden;font-family:var(--mono);font-size:13px}
+.bill button{background:transparent;color:var(--mut);border:0;padding:9px 18px;cursor:pointer;font-family:inherit;transition:all .2s}
+.bill button.on{background:var(--grad);color:#1a0d04;font-weight:700}
+.bill .save{font-size:10px;color:var(--wa);margin-left:6px}
+.prices{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px;align-items:stretch}
+.plan{border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:30px;display:flex;flex-direction:column;position:relative}
+.plan.pop{border-color:var(--amber);background:linear-gradient(170deg,rgba(255,157,60,.10),var(--panel) 55%);box-shadow:0 20px 50px rgba(255,106,26,.14)}
+.plan .badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad);color:#1a0d04;font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;white-space:nowrap}
+.plan .pn{font-family:var(--disp);font-weight:700;font-size:22px}
+.plan .pt{font-size:13px;color:var(--mut);margin:4px 0 20px;min-height:34px}
+.plan .price{font-family:var(--disp);font-weight:800;font-size:46px;line-height:1;letter-spacing:-.02em}
+.plan .price small{font-family:var(--body);font-weight:500;font-size:14px;color:var(--mut)}
+.plan .per{font-size:12px;color:var(--dim);font-family:var(--mono);margin:6px 0 22px}
+.plan ul{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:26px;flex:1}
+.plan li{display:flex;gap:10px;font-size:14px;color:var(--mut);align-items:flex-start}
+.plan li .ic{flex:none;width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:11px;font-weight:700;background:rgba(255,157,60,.14);color:var(--amber)}
+.plan .btn{width:100%;justify-content:center}
+
+/* faq */
+.faq{max-width:780px;margin:44px auto 0}
+.qa{border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:12px;overflow:hidden}
+.qa summary{padding:20px 22px;font-family:var(--disp);font-weight:600;font-size:17px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:"+";font-family:var(--mono);color:var(--amber);font-size:22px;transition:transform .25s}
+.qa[open] summary::after{transform:rotate(45deg)}
+.qa .a{padding:0 22px 20px;color:var(--mut);font-size:14.5px}
+
+/* final */
+.final{text-align:center;padding:120px 0}
+.final .glowbox{max-width:840px;margin:0 auto;padding:70px 40px;border-radius:28px;position:relative;overflow:hidden;border:1px solid var(--line2);background:radial-gradient(120% 140% at 50% -20%,rgba(255,106,26,.25),transparent 60%),var(--panel)}
+.final h2{margin:0 auto 18px;font-size:clamp(34px,5vw,60px)}
+.final p{color:var(--mut);font-size:18px;max-width:520px;margin:0 auto 32px}
+.final .cta-row{justify-content:center}
+.final .note{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:22px}
+
+footer{border-top:1px solid var(--line);padding:42px 0;color:var(--dim);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+footer .logo{font-size:16px}
+
+/* whatsapp float */
+.wafloat{position:fixed;right:22px;bottom:22px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--wa);display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.45);transition:transform .2s;animation:waPulse 2.4s infinite}
+.wafloat:hover{transform:scale(1.08)}
+.wafloat svg{width:30px;height:30px;fill:#04210f}
+@keyframes waPulse{0%{box-shadow:0 0 0 0 rgba(37,211,102,.45)}70%{box-shadow:0 0 0 16px rgba(37,211,102,0)}100%{box-shadow:0 0 0 0 rgba(37,211,102,0)}}
+
+@media(max-width:980px){
+  .hero .wrap{grid-template-columns:1fr;gap:40px}.forge{max-width:420px;margin:0 auto}
+  .prob-grid,.tsts,.prices{grid-template-columns:1fr}
+  .pipe{grid-template-columns:repeat(2,1fr);gap:28px}.pipe::before{display:none}
+  .compare{grid-template-columns:1fr}.bento{grid-template-columns:repeat(2,1fr)}.cbar{grid-template-columns:1fr}
+}
+@media(max-width:520px){.grid20{grid-template-columns:repeat(4,1fr)}.cell.big{grid-column:span 2}.bento{grid-template-columns:1fr 1fr}.trust{gap:18px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="/"><span class="spark">⚡</span>Ad<b>Forge</b></a>
+    <div class="navlinks">
+      <a class="hidem" href="#nasil" data-i18n="nav_how">Nasıl çalışır</a>
+      <a class="hidem" href="#fark" data-i18n="nav_diff">Fark</a>
+      <a class="hidem" href="#fiyat" data-i18n="nav_pricing">Paketler</a>
+      <a class="hidem" href="#sss" data-i18n="nav_faq">SSS</a>
+      <div class="lang">
+        <button data-lang="tr">TR</button><button data-lang="en">EN</button>
+      </div>
+      <a class="btn btn-primary nav-cta" href="/app/" data-i18n="nav_cta">Uygulamayı aç →</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="dot"></span> <span data-i18n="hero_eyebrow">DTC & e-ticaret için UGC motoru</span></span>
+      <h1 data-i18n="hero_h1">Tek fotoğraf.<br><span class="molten">10 kazanan reklam.</span></h1>
+      <p class="lead" data-i18n="hero_lead">Markanın tek bir ürün fotoğrafı + kısa brief'i yeter. AdForge saniyeler içinde <b>10 farklı hook ve avatarla</b> konuşan UGC reklam varyantı üretir — ve <b>hangisinin dönüşeceğini</b> skorlar.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary btn-lg" href="/app/" data-i18n="hero_cta1">Hemen üretmeye başla →</a>
+        <a class="btn btn-wa btn-lg wa" data-msg="demo" data-i18n="hero_cta2">WhatsApp'tan demo iste</a>
+      </div>
+      <div class="trust">
+        <div class="it"><b>10</b><span data-i18n="trust_1">varyant / kampanya</span></div>
+        <div class="it"><b>~$0.04</b><span data-i18n="trust_2">video başına maliyet*</span></div>
+        <div class="it"><b>TR + EN</b><span data-i18n="trust_3">native ses & altyazı</span></div>
+        <div class="it"><b data-i18n="trust_4v">dakikalar</b><span data-i18n="trust_4">günler değil</span></div>
+      </div>
+    </div>
+    <div class="forge">
+      <div class="forge-src"><div class="src-card"><img src="/assets/products/watch-01.jpg" alt="ürün fotoğrafı" loading="eager"></div></div>
+      <div class="src-label" data-i18n="forge_src">ürün fotoğrafın</div>
+      <div class="forge-arrow"><span class="ln"></span> <span data-i18n="forge_arrow">DÖVÜLÜYOR</span> <span class="ln r"></span></div>
+      <div class="grid20" id="grid20"></div>
+    </div>
+  </div>
+  <div class="band"><div class="band-row" id="band"></div></div>
+</header>
+
+<!-- logos -->
+<div class="logos">
+  <div class="wrap">
+    <div class="lab" data-i18n="logos_lab">Büyüyen DTC markalarının reklam motoru</div>
+    <div class="row"><span>NOVÉ</span><span>Lumora</span><span>FitBox</span><span>Glowly</span><span>Kasa&Co</span><span>PURE</span></div>
+  </div>
+</div>
+
+<!-- problem -->
+<section id="problem">
+  <div class="wrap">
+    <span class="tag reveal" data-i18n="prob_tag">Gerçek dert</span>
+    <h2 class="reveal" data-i18n="prob_h2">Reklam test etme koşu bandı <span class="molten">markaları tüketiyor.</span></h2>
+    <p class="sec-lead reveal" data-i18n="prob_lead">Performans pazarlamasında kazanan tek bir reklam yok — sürekli yenisini test etmen gerekiyor. Çoğu marka bu döngüde tıkanıyor.</p>
+    <div class="prob-grid">
+      <div class="prob reveal"><div class="n">01</div><h3 data-i18n="prob_1_t">Pahalı</h3><p data-i18n="prob_1_p">Geleneksel UGC üreticileri video başına <b>$150–500</b> alıyor. Haftada 10 varyant? İmkânsız bütçe.</p></div>
+      <div class="prob reveal"><div class="n">02</div><h3 data-i18n="prob_2_t">Yavaş</h3><p data-i18n="prob_2_p">Brief → çekim → kurgu → teslim günler sürüyor. Trend geçince reklam hazır oluyor.</p></div>
+      <div class="prob reveal"><div class="n">03</div><h3 data-i18n="prob_3_t">Kör</h3><p data-i18n="prob_3_p">Hangi hook'un dönüşeceğini önceden bilemiyorsun. Tahminle bütçe yakıyorsun.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- how -->
+<section id="nasil" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <span class="tag reveal" data-i18n="how_tag">Forge hattı</span>
+    <h2 class="reveal" data-i18n="how_h2">Bir brief girer, <span class="molten">bir reklam cephaneliği çıkar.</span></h2>
+    <p class="sec-lead reveal" data-i18n="how_lead">Arka planda fal.ai'nin görsel, video, ses ve altyazı modellerini zincirleyen 5 aşamalı bir hat.</p>
+    <div class="pipe">
+      <div class="step reveal"><div class="orb">📝</div><div class="k">01 · PLAN</div><h4 data-i18n="how_1_t">Hook'lar</h4><p data-i18n="how_1_p">Brief'ten 4 farklı psikolojik açıyla script.</p></div>
+      <div class="step reveal"><div class="orb">🎭</div><div class="k">02 · COMPOSE</div><h4 data-i18n="how_2_t">Sahne</h4><p data-i18n="how_2_p">Ürün fotoğrafın 5 farklı avatarla sahnelenir.</p></div>
+      <div class="step reveal"><div class="orb">🎬</div><div class="k">03 · ANIMATE</div><h4 data-i18n="how_3_t">Video</h4><p data-i18n="how_3_p">Her avatar hook'u konuşur — native TR/EN ses.</p></div>
+      <div class="step reveal"><div class="orb">💬</div><div class="k">04 · SUBTITLE</div><h4 data-i18n="how_4_t">Altyazı</h4><p data-i18n="how_4_p">Ayrı modelle kelime vurgulu altyazı.</p></div>
+      <div class="step reveal"><div class="orb">📊</div><div class="k">05 · SCORE</div><h4 data-i18n="how_5_t">Rapor</h4><p data-i18n="how_5_p">Her varyant skorlanır, kazanan öne çıkar.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- diff -->
+<section id="fark">
+  <div class="wrap">
+    <span class="tag reveal" data-i18n="diff_tag">Asıl fark</span>
+    <h2 class="reveal" data-i18n="diff_h2">Tek video değil, <span class="molten">sürü.</span> Tahminle değil, <span class="molten">skorla.</span></h2>
+    <div class="compare">
+      <div class="col old reveal">
+        <h3 data-i18n="diff_old_h">Sıradan video araçları</h3>
+        <div class="who" data-i18n="diff_old_w">// tek varlık üretir</div>
+        <ul>
+          <li><span class="ic">✕</span> <span data-i18n="diff_old_1">Bir prompt → bir video. Varyasyon yok.</span></li>
+          <li><span class="ic">✕</span> <span data-i18n="diff_old_2">A/B testi için her şeyi elle tekrarlarsın.</span></li>
+          <li><span class="ic">✕</span> <span data-i18n="diff_old_3">Hangisi tutar bilmeden yayınlarsın.</span></li>
+          <li><span class="ic">✕</span> <span data-i18n="diff_old_4">Avatar/hook çeşitliliği sınırlı.</span></li>
+        </ul>
+      </div>
+      <div class="col new reveal">
+        <h3 data-i18n="diff_new_h">AdForge</h3>
+        <div class="who" data-i18n="diff_new_w">// kampanya üretir + skorlar</div>
+        <ul>
+          <li><span class="ic">✓</span> <span data-i18n="diff_new_1">Bir brief → 10 varyant. Tek seferde.</span></li>
+          <li><span class="ic">✓</span> <span data-i18n="diff_new_2">A/B testi hazır: hook × avatar matrisi.</span></li>
+          <li><span class="ic">✓</span> <span data-i18n="diff_new_3">Performans raporu: kazananı önceden gör.</span></li>
+          <li><span class="ic">✓</span> <span data-i18n="diff_new_4">8 tarz, çeşitli avatarlar, TR + EN.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- testimonials -->
+<section id="referans" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <span class="tag reveal center" data-i18n="tst_tag">Markalar ne diyor</span>
+    <div class="tsts">
+      <div class="tst reveal"><div class="q" data-i18n="tst_1_q">İlk haftada 18 varyant test ettik. Kazanan reklam CPA'mizi yarıya indirdi.</div><div class="who"><div class="av">E</div><div><div class="nm">Elif K.</div><div class="rl" data-i18n="tst_1_r">Performans Pazarlama, Glowly</div></div></div></div>
+      <div class="tst reveal"><div class="q" data-i18n="tst_2_q">Ajansa ödediğimizin onda biri, on katı hızında. Artık her hafta yeni creative test ediyoruz.</div><div class="who"><div class="av">M</div><div><div class="nm">Mert A.</div><div class="rl" data-i18n="tst_2_r">Kurucu, FitBox</div></div></div></div>
+      <div class="tst reveal"><div class="q" data-i18n="tst_3_q">Performans raporu sayesinde hangi hook'a bütçe vereceğimizi tahmin etmiyoruz, biliyoruz.</div><div class="who"><div class="av">S</div><div><div class="nm">Selin D.</div><div class="rl" data-i18n="tst_3_r">Büyüme, NOVÉ</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- cost -->
+<section id="maliyet">
+  <div class="wrap">
+    <span class="tag reveal" data-i18n="cost_tag">Maliyet</span>
+    <h2 class="reveal" data-i18n="cost_h2">UGC'ye ödediğin <span class="molten">$150–500</span>'ü kuruşlara indir.</h2>
+    <p class="sec-lead reveal" data-i18n="cost_lead">Aynı bütçeyle tek video yerine 10 varyant test et. Kullandıkça öde mantığı + abonelik paketleri.</p>
+    <div class="cost">
+      <div class="cbar old reveal"><div class="lbl" data-i18n="cost_old_l">Geleneksel UGC üreticisi<b data-i18n="cost_old_b">video başına</b></div><div class="track"><div class="fill" data-w="100" data-i18n="cost_old_v">$150 – $500</div></div></div>
+      <div class="cbar new reveal"><div class="lbl" data-i18n="cost_new_l">AdForge<b data-i18n="cost_new_b">video başına*</b></div><div class="track"><div class="fill" data-w="14" data-i18n="cost_new_v">birkaç kuruş</div></div></div>
+    </div>
+    <p style="font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:22px" data-i18n="cost_note">* Ekonomi pipeline'ında varyant başına maliyet; kalite seviyesine göre değişir. Üretim öncesi net maliyet onayı istenir.</p>
+  </div>
+</section>
+
+<!-- features -->
+<section id="ozellikler" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <span class="tag reveal" data-i18n="feat_tag">Kaputun altında</span>
+    <h2 class="reveal" data-i18n="feat_h2">Ajans kalitesi, <span class="molten">yazılım hızı.</span></h2>
+    <div class="bento">
+      <div class="cell big reveal">
+        <div><div class="em">⚡</div><h4 data-i18n="feat_big_t">Kampanya başına</h4><p data-i18n="feat_big_s">5 hook × 2 avatar</p></div>
+        <div class="huge">10</div>
+        <p data-i18n="feat_big_p">tek brief'ten satışa hazır UGC varyantı + sıralı performans raporu.</p>
+        <div class="corner"></div>
+      </div>
+      <div class="cell reveal"><div class="em">🎭</div><h4 data-i18n="feat_1_t">8 UGC tarzı</h4><p data-i18n="feat_1_p">Samimi itiraf, problem-çözüm, lüks, komik ve daha fazlası.</p></div>
+      <div class="cell reveal"><div class="em">🌍</div><h4 data-i18n="feat_2_t">TR + EN</h4><p data-i18n="feat_2_p">Native ses, doğru telaffuz, otomatik altyazı.</p></div>
+      <div class="cell wide reveal"><div class="em">📊</div><h4 data-i18n="feat_3_t">Performans raporu</h4><p data-i18n="feat_3_p">Her varyant 0–100 tahmini dönüşüm skoru alır; kazanan işaretlenir. Sonra gerçek platform verisiyle (Meta/TikTok) beslenecek mimari.</p></div>
+      <div class="cell reveal"><div class="em">🔌</div><h4 data-i18n="feat_4_t">Genişleyebilir</h4><p data-i18n="feat_4_p">Yeni tarz, avatar, motor = tek dosya. Registry mimarisi.</p></div>
+      <div class="cell reveal"><div class="em">🛡️</div><h4 data-i18n="feat_5_t">Maliyet onaylı</h4><p data-i18n="feat_5_p">Habersiz harcama yok. Üretim öncesi her zaman onay.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- pricing -->
+<section id="fiyat">
+  <div class="wrap center">
+    <span class="tag reveal" data-i18n="price_tag">Paketler</span>
+    <h2 class="reveal" data-i18n="price_h2">Markana göre <span class="molten">ölçeklen.</span></h2>
+    <p class="sec-lead reveal" data-i18n="price_lead">Aylık abonelik, istediğin zaman iptal. Tüm paketlerde TR + EN ses, 8 tarz, performans raporu.</p>
+    <div class="bill">
+      <button data-bill="mo" class="on" data-i18n="bill_mo">Aylık</button>
+      <button data-bill="yr" data-i18n="bill_yr">Yıllık <span class="save">−%20</span></button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="prices" id="prices"></div>
+    <p style="text-align:center;font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:26px" data-i18n="price_note">Daha fazla hacim mi lazım? <a href="#" class="wa" data-msg="enterprise" style="color:var(--amber)">Kurumsal için bize yaz →</a></p>
+  </div>
+</section>
+
+<!-- faq -->
+<section id="sss" style="background:var(--bg2);border-top:1px solid var(--line)">
+  <div class="wrap center">
+    <span class="tag reveal" data-i18n="faq_tag">Sık sorulanlar</span>
+    <h2 class="reveal" data-i18n="faq_h2">Merak edilenler</h2>
+  </div>
+  <div class="wrap"><div class="faq" id="faq"></div></div>
+</section>
+
+<!-- final -->
+<section class="final">
+  <div class="wrap">
+    <div class="glowbox reveal">
+      <h2 data-i18n="final_h2">Markanın bir sonraki <span class="molten">kazanan reklamı</span> burada.</h2>
+      <p data-i18n="final_p">Bir ürün fotoğrafı yükle, brief'i yaz, gerisini AdForge dövsün.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary btn-lg" href="/app/" data-i18n="final_cta1">Uygulamayı aç →</a>
+        <a class="btn btn-wa btn-lg wa" data-msg="demo" data-i18n="final_cta2">WhatsApp'tan demo iste</a>
+      </div>
+      <div class="note" data-i18n="final_note">fal.ai anahtarınla dakikalar içinde ilk kampanyanı üret.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="/"><span class="spark">⚡</span>Ad<b>Forge</b></a>
+    <div data-i18n="footer_tag">UGC reklam varyant motoru · fal.ai ile güçlendirilmiştir</div>
+    <div>© 2026 AdForge</div>
+  </div>
+</footer>
+
+<a class="wafloat wa" data-msg="demo" aria-label="WhatsApp">
+  <svg viewBox="0 0 32 32"><path d="M16 .4C7.4.4.4 7.4.4 16c0 2.8.7 5.5 2.1 7.9L.3 31.7l8-2.1c2.3 1.3 4.9 1.9 7.6 1.9 8.6 0 15.6-7 15.6-15.6S24.6.4 16 .4zm0 28.5c-2.4 0-4.8-.6-6.8-1.9l-.5-.3-4.8 1.3 1.3-4.6-.3-.5c-1.4-2.2-2.1-4.7-2.1-7.3C2.9 8.8 8.8 2.9 16 2.9S29.1 8.8 29.1 16 23.2 28.9 16 28.9zm7.2-9.6c-.4-.2-2.3-1.1-2.7-1.3-.4-.1-.6-.2-.9.2-.3.4-1 1.3-1.2 1.5-.2.2-.4.3-.8.1-.4-.2-1.7-.6-3.2-2-1.2-1-2-2.4-2.2-2.8-.2-.4 0-.6.2-.8.2-.2.4-.4.6-.7.2-.2.3-.4.4-.7.1-.2 0-.5 0-.7-.1-.2-.9-2.1-1.2-2.9-.3-.8-.6-.7-.9-.7h-.8c-.2 0-.7.1-1 .5-.3.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.8c.2.2 2.6 4 6.3 5.6.9.4 1.6.6 2.1.8.9.3 1.7.2 2.3.1.7-.1 2.3-.9 2.6-1.8.3-.9.3-1.6.2-1.8-.1-.2-.3-.3-.7-.5z"/></svg>
+</a>
+
+<script>
+// ===== AYAR: WhatsApp numaranı buraya yaz (ülke kodu + numara, + ve boşluk olmadan) =====
+const WHATSAPP_NUMBER = "905555555555"; // TODO: gerçek numaranla değiştir
+
+// ===== i18n =====
+const I18N = {
+  tr:{
+    nav_how:"Nasıl çalışır",nav_diff:"Fark",nav_pricing:"Paketler",nav_faq:"SSS",nav_cta:"Uygulamayı aç →",
+    hero_eyebrow:"DTC & e-ticaret için UGC motoru",
+    hero_h1:'Tek fotoğraf.<br><span class="molten">10 kazanan reklam.</span>',
+    hero_lead:'Markanın tek bir ürün fotoğrafı + kısa brief\'i yeter. AdForge saniyeler içinde <b>10 farklı hook ve avatarla</b> konuşan UGC reklam varyantı üretir — ve <b>hangisinin dönüşeceğini</b> skorlar.',
+    hero_cta1:"Hemen üretmeye başla →",hero_cta2:"WhatsApp'tan demo iste",
+    trust_1:"varyant / kampanya",trust_2:"video başına maliyet*",trust_3:"native ses & altyazı",trust_4:"günler değil",trust_4v:"dakikalar",
+    forge_src:"ürün fotoğrafın",forge_arrow:"DÖVÜLÜYOR",
+    logos_lab:"Büyüyen DTC markalarının reklam motoru",
+    prob_tag:"Gerçek dert",prob_h2:'Reklam test etme koşu bandı <span class="molten">markaları tüketiyor.</span>',
+    prob_lead:"Performans pazarlamasında kazanan tek bir reklam yok — sürekli yenisini test etmen gerekiyor. Çoğu marka bu döngüde tıkanıyor.",
+    prob_1_t:"Pahalı",prob_1_p:"Geleneksel UGC üreticileri video başına <b>$150–500</b> alıyor. Haftada 10 varyant? İmkânsız bütçe.",
+    prob_2_t:"Yavaş",prob_2_p:"Brief → çekim → kurgu → teslim günler sürüyor. Trend geçince reklam hazır oluyor.",
+    prob_3_t:"Kör",prob_3_p:"Hangi hook'un dönüşeceğini önceden bilemiyorsun. Tahminle bütçe yakıyorsun.",
+    how_tag:"Forge hattı",how_h2:'Bir brief girer, <span class="molten">bir reklam cephaneliği çıkar.</span>',
+    how_lead:"Arka planda fal.ai'nin görsel, video, ses ve altyazı modellerini zincirleyen 5 aşamalı bir hat.",
+    how_1_t:"Hook'lar",how_1_p:"Brief'ten 4 farklı psikolojik açıyla script.",
+    how_2_t:"Sahne",how_2_p:"Ürün fotoğrafın 5 farklı avatarla sahnelenir.",
+    how_3_t:"Video",how_3_p:"Her avatar hook'u konuşur — native TR/EN ses.",
+    how_4_t:"Altyazı",how_4_p:"Ayrı modelle kelime vurgulu altyazı.",
+    how_5_t:"Rapor",how_5_p:"Her varyant skorlanır, kazanan öne çıkar.",
+    diff_tag:"Asıl fark",diff_h2:'Tek video değil, <span class="molten">sürü.</span> Tahminle değil, <span class="molten">skorla.</span>',
+    diff_old_h:"Sıradan video araçları",diff_old_w:"// tek varlık üretir",
+    diff_old_1:"Bir prompt → bir video. Varyasyon yok.",diff_old_2:"A/B testi için her şeyi elle tekrarlarsın.",diff_old_3:"Hangisi tutar bilmeden yayınlarsın.",diff_old_4:"Avatar/hook çeşitliliği sınırlı.",
+    diff_new_h:"AdForge",diff_new_w:"// kampanya üretir + skorlar",
+    diff_new_1:"Bir brief → 10 varyant. Tek seferde.",diff_new_2:"A/B testi hazır: hook × avatar matrisi.",diff_new_3:"Performans raporu: kazananı önceden gör.",diff_new_4:"8 tarz, çeşitli avatarlar, TR + EN.",
+    tst_tag:"Markalar ne diyor",
+    tst_1_q:"İlk haftada 18 varyant test ettik. Kazanan reklam CPA'mizi yarıya indirdi.",tst_1_r:"Performans Pazarlama, Glowly",
+    tst_2_q:"Ajansa ödediğimizin onda biri, on katı hızında. Artık her hafta yeni creative test ediyoruz.",tst_2_r:"Kurucu, FitBox",
+    tst_3_q:"Performans raporu sayesinde hangi hook'a bütçe vereceğimizi tahmin etmiyoruz, biliyoruz.",tst_3_r:"Büyüme, NOVÉ",
+    cost_tag:"Maliyet",cost_h2:'UGC\'ye ödediğin <span class="molten">$150–500</span>\'ü kuruşlara indir.',
+    cost_lead:"Aynı bütçeyle tek video yerine 10 varyant test et. Kullandıkça öde + abonelik paketleri.",
+    cost_old_l:"Geleneksel UGC üreticisi",cost_old_b:"video başına",cost_old_v:"$150 – $500",
+    cost_new_l:"AdForge",cost_new_b:"video başına*",cost_new_v:"birkaç kuruş",
+    cost_note:"* Ekonomi pipeline'ında varyant başına maliyet; kalite seviyesine göre değişir. Üretim öncesi net maliyet onayı istenir.",
+    feat_tag:"Kaputun altında",feat_h2:'Ajans kalitesi, <span class="molten">yazılım hızı.</span>',
+    feat_big_t:"Kampanya başına",feat_big_s:"5 hook × 2 avatar",feat_big_p:"tek brief'ten satışa hazır UGC varyantı + sıralı performans raporu.",
+    feat_1_t:"8 UGC tarzı",feat_1_p:"Samimi itiraf, problem-çözüm, lüks, komik ve daha fazlası.",
+    feat_2_t:"TR + EN",feat_2_p:"Native ses, doğru telaffuz, otomatik altyazı.",
+    feat_3_t:"Performans raporu",feat_3_p:"Her varyant 0–100 tahmini dönüşüm skoru alır; kazanan işaretlenir. Sonra gerçek platform verisiyle (Meta/TikTok) beslenecek mimari.",
+    feat_4_t:"Genişleyebilir",feat_4_p:"Yeni tarz, avatar, motor = tek dosya. Registry mimarisi.",
+    feat_5_t:"Maliyet onaylı",feat_5_p:"Habersiz harcama yok. Üretim öncesi her zaman onay.",
+    price_tag:"Paketler",price_h2:'Markana göre <span class="molten">ölçeklen.</span>',
+    price_lead:"Aylık abonelik, istediğin zaman iptal. Tüm paketlerde TR + EN ses, 8 tarz, performans raporu.",
+    bill_mo:"Aylık",bill_yr:'Yıllık <span class="save">−%20</span>',
+    price_note:'Daha fazla hacim mi lazım? <a href="#" class="wa" data-msg="enterprise" style="color:var(--amber)">Kurumsal için bize yaz →</a>',
+    faq_tag:"Sık sorulanlar",faq_h2:"Merak edilenler",
+    final_h2:'Markanın bir sonraki <span class="molten">kazanan reklamı</span> burada.',
+    final_p:"Bir ürün fotoğrafı yükle, brief'i yaz, gerisini AdForge dövsün.",
+    final_cta1:"Uygulamayı aç →",final_cta2:"WhatsApp'tan demo iste",
+    final_note:"fal.ai anahtarınla dakikalar içinde ilk kampanyanı üret.",
+    footer_tag:"UGC reklam varyant motoru · fal.ai ile güçlendirilmiştir",
+    band:["10 VARYANT","TEK FOTOĞRAF","TR + EN SES","PERFORMANS SKORU","DAKİKALAR İÇİNDE","8 UGC TARZI","A/B TESTİ HAZIR","$150–500 → KURUŞ"],
+    plans:[
+      {name:"Başlangıç",tag:"Yeni başlayan markalar için",mo:49,yr:39,per:"/ ay · yıllık ödemede",feats:["Ayda 5 kampanya (50 varyant)","8 UGC tarzı, TR + EN","Performans raporu","E-posta destek"],cta:"Paketi seç",pop:false},
+      {name:"Büyüme",tag:"Düzenli test eden markalar",mo:149,yr:119,per:"/ ay · yıllık ödemede",feats:["Ayda 20 kampanya (200 varyant)","Öncelikli üretim kuyruğu","Gelişmiş performans raporu","WhatsApp öncelikli destek","Marka kimliği profilleri"],cta:"Paketi seç",pop:true,badge:"EN POPÜLER"},
+      {name:"Ajans",tag:"Ajanslar & çok markalı",mo:399,yr:319,per:"/ ay · yıllık ödemede",feats:["Ayda 100 kampanya","White-label & çoklu marka","Kendi avatarını yükle","API erişimi","Özel başarı yöneticisi"],cta:"Bize ulaş",pop:false}
+    ],
+    faq:[
+      {q:"Gerçekten tek fotoğraf yeter mi?",a:"Evet. Tek bir ürün fotoğrafı + kısa brief ile sistem 5 farklı avatarı ürünle sahneler ve 4 farklı hook'la konuşturur. İstersen kendi influencer/model görsellerini de yükleyebilirsin (Ajans paketi)."},
+      {q:"Sesler gerçekten Türkçe mi?",a:"Evet, native Türkçe ve İngilizce ses + otomatik kelime-vurgulu altyazı. Dil değiştirici ile her iki dilde de üretebilirsin."},
+      {q:"Performans raporu neye göre skorluyor?",a:"v1'de her varyant hook gücü, netlik, CTA ve kitle uyumuna göre 0–100 tahmini dönüşüm skoru alır. Sonraki sürümde Meta/TikTok gerçek reklam verisiyle beslenecek."},
+      {q:"Videolar ne kadar sürede hazır?",a:"Bir kampanya (10 varyant) genelde birkaç dakikada tamamlanır. Geleneksel UGC'de bu günler sürer."},
+      {q:"Üretim maliyeti nasıl işliyor?",a:"Abonelik kampanya kotanı kapsar; her üretim öncesi net maliyet gösterilir, habersiz harcama olmaz. Kullandıkça öde modeli de mevcut."}
+    ],
+    wa:{demo:"Merhaba, AdForge demosu istiyorum.",enterprise:"Merhaba, AdForge kurumsal/yüksek hacim paketini konuşmak istiyorum.",plan:"Merhaba, AdForge {plan} paketiyle ilgileniyorum."}
+  },
+  en:{
+    nav_how:"How it works",nav_diff:"Difference",nav_pricing:"Pricing",nav_faq:"FAQ",nav_cta:"Open the app →",
+    hero_eyebrow:"UGC engine for DTC & e-commerce",
+    hero_h1:'One photo.<br><span class="molten">10 winning ads.</span>',
+    hero_lead:'Just one product photo + a short brief. AdForge forges <b>10 ad variants with different hooks and avatars</b> in seconds — and scores <b>which one will convert</b>.',
+    hero_cta1:"Start producing →",hero_cta2:"Request a demo on WhatsApp",
+    trust_1:"variants / campaign",trust_2:"cost per video*",trust_3:"native voice & subtitles",trust_4:"not days",trust_4v:"minutes",
+    forge_src:"your product photo",forge_arrow:"FORGING",
+    logos_lab:"The ad engine for growing DTC brands",
+    prob_tag:"The real pain",prob_h2:'The ad-testing treadmill <span class="molten">is burning brands out.</span>',
+    prob_lead:"In performance marketing there's no single winning ad — you must keep testing new ones. Most brands get stuck in this loop.",
+    prob_1_t:"Expensive",prob_1_p:"Traditional UGC creators charge <b>$150–500</b> per video. 10 variants a week? Impossible budget.",
+    prob_2_t:"Slow",prob_2_p:"Brief → shoot → edit → deliver takes days. By the time it's ready, the trend is gone.",
+    prob_3_t:"Blind",prob_3_p:"You can't know which hook converts in advance. You burn budget on guesses.",
+    how_tag:"The forge line",how_h2:'One brief in, <span class="molten">an ad arsenal out.</span>',
+    how_lead:"A 5-stage line chaining fal.ai's image, video, voice and subtitle models behind the scenes.",
+    how_1_t:"Hooks",how_1_p:"4 scripts with distinct psychological angles from your brief.",
+    how_2_t:"Scene",how_2_p:"Your product photo staged with 5 different avatars.",
+    how_3_t:"Video",how_3_p:"Each avatar speaks the hook — native TR/EN voice.",
+    how_4_t:"Subtitle",how_4_p:"Word-highlighted captions via a dedicated model.",
+    how_5_t:"Report",how_5_p:"Every variant is scored; the winner stands out.",
+    diff_tag:"The real difference",diff_h2:'Not one video, <span class="molten">a swarm.</span> Not a guess, <span class="molten">a score.</span>',
+    diff_old_h:"Ordinary video tools",diff_old_w:"// produce a single asset",
+    diff_old_1:"One prompt → one video. No variation.",diff_old_2:"You repeat everything by hand for A/B tests.",diff_old_3:"You publish without knowing what works.",diff_old_4:"Limited avatar/hook diversity.",
+    diff_new_h:"AdForge",diff_new_w:"// produces a campaign + scores it",
+    diff_new_1:"One brief → 10 variants. In one shot.",diff_new_2:"A/B ready: hook × avatar matrix.",diff_new_3:"Performance report: see the winner upfront.",diff_new_4:"8 styles, diverse avatars, TR + EN.",
+    tst_tag:"What brands say",
+    tst_1_q:"We tested 18 variants in the first week. The winner cut our CPA in half.",tst_1_r:"Performance Marketing, Glowly",
+    tst_2_q:"A tenth of agency cost, ten times the speed. Now we test fresh creative every week.",tst_2_r:"Founder, FitBox",
+    tst_3_q:"Thanks to the report we don't guess which hook to fund — we know.",tst_3_r:"Growth, NOVÉ",
+    cost_tag:"Cost",cost_h2:'Cut the <span class="molten">$150–500</span> you pay for UGC down to pennies.',
+    cost_lead:"Test 10 variants for the price of one video. Pay-as-you-go + subscription plans.",
+    cost_old_l:"Traditional UGC creator",cost_old_b:"per video",cost_old_v:"$150 – $500",
+    cost_new_l:"AdForge",cost_new_b:"per video*",cost_new_v:"a few cents",
+    cost_note:"* Per-variant cost on the economy pipeline; varies by quality level. A clear cost approval is always shown before production.",
+    feat_tag:"Under the hood",feat_h2:'Agency quality, <span class="molten">software speed.</span>',
+    feat_big_t:"Per campaign",feat_big_s:"5 hooks × 2 avatars",feat_big_p:"ready-to-run UGC variants from one brief + a ranked performance report.",
+    feat_1_t:"8 UGC styles",feat_1_p:"Candid testimonial, problem-solution, luxury, funny and more.",
+    feat_2_t:"TR + EN",feat_2_p:"Native voice, accurate pronunciation, auto subtitles.",
+    feat_3_t:"Performance report",feat_3_p:"Each variant gets a 0–100 predicted conversion score; the winner is flagged. Architecture ready for real platform data (Meta/TikTok).",
+    feat_4_t:"Extensible",feat_4_p:"New style, avatar, engine = one file. Registry architecture.",
+    feat_5_t:"Cost-approved",feat_5_p:"No surprise spend. Always an approval before production.",
+    price_tag:"Pricing",price_h2:'Scale <span class="molten">with your brand.</span>',
+    price_lead:"Monthly subscription, cancel anytime. All plans include TR + EN voice, 8 styles, performance report.",
+    bill_mo:"Monthly",bill_yr:'Yearly <span class="save">−20%</span>',
+    price_note:'Need more volume? <a href="#" class="wa" data-msg="enterprise" style="color:var(--amber)">Talk to us about Enterprise →</a>',
+    faq_tag:"FAQ",faq_h2:"Questions, answered",
+    final_h2:'Your brand\'s next <span class="molten">winning ad</span> is here.',
+    final_p:"Upload a product photo, write the brief, let AdForge forge the rest.",
+    final_cta1:"Open the app →",final_cta2:"Request a demo on WhatsApp",
+    final_note:"Produce your first campaign in minutes with your fal.ai key.",
+    footer_tag:"UGC ad variant engine · powered by fal.ai",
+    band:["10 VARIANTS","ONE PHOTO","TR + EN VOICE","PERFORMANCE SCORE","IN MINUTES","8 UGC STYLES","A/B TEST READY","$150–500 → CENTS"],
+    plans:[
+      {name:"Starter",tag:"For brands getting started",mo:49,yr:39,per:"/ mo · billed yearly",feats:["5 campaigns/mo (50 variants)","8 UGC styles, TR + EN","Performance report","Email support"],cta:"Choose plan",pop:false},
+      {name:"Growth",tag:"For brands testing regularly",mo:149,yr:119,per:"/ mo · billed yearly",feats:["20 campaigns/mo (200 variants)","Priority production queue","Advanced performance report","Priority WhatsApp support","Brand identity profiles"],cta:"Choose plan",pop:true,badge:"MOST POPULAR"},
+      {name:"Agency",tag:"Agencies & multi-brand",mo:399,yr:319,per:"/ mo · billed yearly",feats:["100 campaigns/mo","White-label & multi-brand","Upload your own avatars","API access","Dedicated success manager"],cta:"Contact us",pop:false}
+    ],
+    faq:[
+      {q:"Is a single photo really enough?",a:"Yes. With one product photo + a short brief, the system stages 5 avatars with your product and has them speak 4 different hooks. You can also upload your own influencer/model images (Agency plan)."},
+      {q:"Is the voice really native?",a:"Yes — native Turkish and English voice + automatic word-highlighted subtitles. Switch language to produce in either."},
+      {q:"How does the performance report score?",a:"In v1 each variant gets a 0–100 predicted conversion score based on hook strength, clarity, CTA and audience fit. A future version is fed by real Meta/TikTok ad data."},
+      {q:"How fast are the videos ready?",a:"A campaign (10 variants) usually completes in a few minutes. Traditional UGC takes days."},
+      {q:"How does production cost work?",a:"Your subscription covers your campaign quota; a clear cost is shown before each production, no surprise spend. Pay-as-you-go is also available."}
+    ],
+    wa:{demo:"Hi, I'd like an AdForge demo.",enterprise:"Hi, I'd like to discuss AdForge enterprise / high-volume.",plan:"Hi, I'm interested in the AdForge {plan} plan."}
+  }
+};
+
+let LANG = localStorage.getItem('adforge_lang') || 'tr';
+let BILL = 'mo';
+
+function waLink(msg){ return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`; }
+
+// TEK ürün — tüm varyantlar AYNI saatin farklı reklam versiyonları (kadraj + ton + avatar farkı)
+const PRODUCT='/assets/products/watch-01.jpg';
+const TREAT=[
+  {z:1.06,p:'50% 42%',t:'rgba(255,157,60,.12)'},
+  {z:1.20,p:'34% 30%',t:'rgba(124,182,255,.12)'},
+  {z:1.12,p:'66% 56%',t:'rgba(0,0,0,0)'},
+  {z:1.24,p:'44% 62%',t:'rgba(255,150,190,.12)'},
+  {z:1.09,p:'62% 34%',t:'rgba(74,222,128,.10)'},
+  {z:1.16,p:'40% 50%',t:'rgba(255,67,38,.12)'},
+];
+function renderGrid(){
+  const win=3; let f='';
+  for(let i=0;i<10;i++){
+    const t=TREAT[i%TREAT.length];
+    const score=win===i?96:58+Math.floor(Math.random()*34);
+    f+=`<div class="vtile${i===win?' win':''}" style="animation-delay:${.45+i*.045}s">
+      <img class="ph kb${(i%3)+1}" src="${PRODUCT}" alt="" loading="lazy" style="object-position:${t.p};animation-delay:${(i*0.5).toFixed(1)}s">
+      <div class="tint" style="background:${t.t}"></div><div class="shade"></div>
+      ${i===win?'<span class="flag">★</span>':''}<span class="sc">${score}</span><span class="vdur">0:08</span></div>`;
+  }
+  document.getElementById('grid20').innerHTML=f;
+}
+
+function renderBand(){
+  const items=I18N[LANG].band;
+  const html=items.map(t=>`<span class="it">${t} <span class="sep">◆</span></span>`).join('');
+  document.getElementById('band').innerHTML=html+html;
+}
+
+function renderPlans(){
+  const t=I18N[LANG];
+  document.getElementById('prices').innerHTML=t.plans.map(p=>{
+    const price=BILL==='yr'?p.yr:p.mo;
+    const per=BILL==='yr'?p.per:(LANG==='tr'?"/ ay":"/ mo");
+    const msg=t.wa.plan.replace('{plan}',p.name);
+    return `<div class="plan reveal in${p.pop?' pop':''}">
+      ${p.badge?`<div class="badge">${p.badge}</div>`:''}
+      <div class="pn">${p.name}</div><div class="pt">${p.tag}</div>
+      <div class="price">$${price}<small> ${BILL==='yr'?'':''}</small></div>
+      <div class="per">${per}</div>
+      <ul>${p.feats.map(fe=>`<li><span class="ic">✓</span> ${fe}</li>`).join('')}</ul>
+      <a class="btn ${p.pop?'btn-primary':'btn-ghost'}" href="${waLink(msg)}" target="_blank" rel="noopener">${p.cta}</a>
+    </div>`;
+  }).join('');
+}
+
+function renderFaq(){
+  const t=I18N[LANG];
+  document.getElementById('faq').innerHTML=t.faq.map((x,i)=>`<details class="qa"${i===0?' open':''}><summary>${x.q}</summary><div class="a">${x.a}</div></details>`).join('');
+}
+
+function applyLang(lang){
+  LANG=lang; localStorage.setItem('adforge_lang',lang); document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(I18N[lang][k]!==undefined)el.innerHTML=I18N[lang][k];});
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
+  renderBand(); renderPlans(); renderFaq(); bindWa();
+}
+
+function bindWa(){
+  document.querySelectorAll('.wa').forEach(el=>{
+    const key=el.dataset.msg||'demo';
+    const msg=I18N[LANG].wa[key]||I18N[LANG].wa.demo;
+    if(el.tagName==='A'){ el.href=waLink(msg); el.target='_blank'; el.rel='noopener'; }
+  });
+}
+
+// events
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>applyLang(b.dataset.lang)));
+document.querySelectorAll('.bill button').forEach(b=>b.addEventListener('click',()=>{
+  BILL=b.dataset.bill; document.querySelectorAll('.bill button').forEach(x=>x.classList.toggle('on',x===b)); renderPlans();
+}));
+
+// scroll reveal
+const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.15});
+function observeReveals(){document.querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}
+// cost bars
+const io2=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){const f=e.target.querySelector('.fill');if(f)f.style.width=f.dataset.w+'%';io2.unobserve(e.target);}})},{threshold:.4});
+
+// init
+renderGrid();
+applyLang(LANG);
+observeReveals();
+document.querySelectorAll('.cbar').forEach(el=>io2.observe(el));
+</script>
+</body>
+</html>

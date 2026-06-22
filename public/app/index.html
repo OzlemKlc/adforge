@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AdForge — Konsol</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">⚡</span>
+    <span>Ad<b>Forge</b></span>
+    <em>UGC varyant motoru</em>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="/" style="color:var(--muted);text-decoration:none;font-size:12px">← Anasayfa</a>
+    <div id="health" class="health">…</div>
+  </div>
+</header>
+
+<main>
+  <!-- SOL: yeni kampanya formu -->
+  <section class="panel form-panel">
+    <h2>Yeni kampanya</h2>
+
+    <div class="row">
+      <label class="grow">Marka adı
+        <input id="brandName" type="text" placeholder="Örn: Glowly" />
+      </label>
+      <label>Dil
+        <select id="language">
+          <option value="tr">Türkçe</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Ürün *
+      <input id="product" type="text" placeholder="Örn: C vitamini yüz serumu" />
+    </label>
+
+    <label>Öne çıkan fayda
+      <input id="benefit" type="text" placeholder="Örn: kuru cildi 3 haftada parlatır" />
+    </label>
+
+    <div class="row">
+      <label class="grow">Hedef kitle
+        <input id="audience" type="text" placeholder="Örn: 25-40 yaş cilt bakımı meraklıları" />
+      </label>
+    </div>
+
+    <label>Marka tonu
+      <input id="tone" type="text" placeholder="Örn: samimi, bilimsel, güven veren" />
+    </label>
+
+    <label>Ürün görseli (tek fotoğraf)
+      <input id="image" type="file" accept="image/*" />
+      <small id="imageStatus" class="hint"></small>
+    </label>
+
+    <label>Tarzlar <small class="hint">(varyantlara dağıtılır — birden fazla seç)</small>
+      <div id="styles" class="chips"></div>
+    </label>
+
+    <div class="row">
+      <label>Avatar
+        <select id="avatars"></select>
+      </label>
+      <label>Hook
+        <select id="hooks"></select>
+      </label>
+      <label class="grow">Varyant
+        <div id="variantCount" class="pill">10</div>
+      </label>
+    </div>
+
+    <div class="row">
+      <label class="grow">Kalite
+        <select id="level"></select>
+      </label>
+      <label>Süre
+        <select id="duration">
+          <option value="6s">6 sn</option>
+          <option value="8s" selected>8 sn</option>
+          <option value="10">10 sn</option>
+          <option value="12">12 sn</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Üretim motoru
+      <select id="engine"></select>
+    </label>
+
+    <div class="cost-box">
+      <div class="cost-main"><span>Tahmini maliyet</span><strong id="costTotal">—</strong></div>
+      <small id="costBreakdown"></small>
+    </div>
+
+    <button id="produceBtn" class="primary">Kampanyayı üret</button>
+    <button id="demoBtn" class="secondary">✨ Demo kampanyası oluştur (anahtarsız)</button>
+    <div id="produceMsg" class="msg"></div>
+  </section>
+
+  <!-- SAĞ: kampanya görünümü -->
+  <section class="panel camp-panel">
+    <div class="camp-head">
+      <h2>Kampanyalar</h2>
+      <div id="campList" class="camp-list"></div>
+    </div>
+
+    <div id="report" class="report hidden"></div>
+
+    <div id="variants" class="variants">
+      <div class="empty">Soldan bir kampanya başlat. 5 avatar × 4 hook = 20 varyant + performans raporu üretilir.</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <small>
+    AdForge — tek ürün fotoğrafı + brief → 20 UGC reklam varyantı + performans raporu.
+    fal.ai (görsel + video + altyazı) üzerinden çalışır. Model havuzu sabit, maliyet her zaman onaylı.
+  </small>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
