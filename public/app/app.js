@@ -48,6 +48,7 @@ async function init() {
   buildLevels();
   buildEngines();
   bindEvents();
+  syncEngineUi();
   updateVariantCount();
   updateCost();
   refreshCampaigns();
@@ -57,13 +58,9 @@ async function init() {
 async function checkHealth() {
   try {
     const j = await (await fetch('/api/health')).json();
-    if (j.falKey === 'present') {
-      els.health.textContent = `fal.ai bağlı ✓ · hook/skor: ${j.llm ? 'LLM' : 'şablon'}`;
-      els.health.className = 'health ok';
-    } else {
-      els.health.textContent = '● Önizleme modu — fal.ai anahtarı yok (üretim kapalı, .env\'e FAL_KEY ekle)';
-      els.health.className = 'health bad';
-    }
+    const fal = j.falKey === 'present' ? 'fal.ai bağlı ✓' : 'fal.ai: yok (opsiyonel)';
+    els.health.textContent = `yerel motor hazır ✓ · ${fal} · hook/skor: ${j.llm ? 'LLM' : 'şablon'}`;
+    els.health.className = 'health ok';
   } catch { els.health.textContent = 'sunucu yok'; els.health.className = 'health bad'; }
 }
 
@@ -96,12 +93,38 @@ function buildNumberSelect(sel, lo, hi, def) {
   }
 }
 
+// motor <-> seviye <-> sure eslesmesi
+// faceless: 15-30 sn ucretsiz; avatar: ~10-15 sn (gercek sure = ses uzunlugu); veo: 6-12 sn
+const DURATIONS = {
+  faceless: [['15s', '15 sn'], ['20s', '20 sn'], ['25s', '25 sn'], ['30s', '30 sn']],
+  avatar: [['10s', '~10 sn (ses kadar)'], ['15s', '~15 sn (ses kadar)']],
+  fal: [['6s', '6 sn'], ['8s', '8 sn'], ['10', '10 sn'], ['12', '12 sn']],
+};
+const ENGINE_LEVEL = { faceless: 'yerel', avatar: 'avatar' };
+const ENGINE_DEFAULT_DUR = { faceless: '20s', avatar: '10s' };
+
+function selectedEngine() {
+  return (META.engines || []).find((x) => x.id === els.engine.value) || {};
+}
+
+function buildDurations(kind, selected) {
+  els.duration.innerHTML = '';
+  (DURATIONS[kind] || DURATIONS.fal).forEach(([val, txt]) => {
+    const o = document.createElement('option');
+    o.value = val; o.textContent = txt;
+    if (val === selected) o.selected = true;
+    els.duration.appendChild(o);
+  });
+}
+
 function buildLevels() {
   els.level.innerHTML = '';
   META.levels.filter((l) => l.id !== 'uzun').forEach((l) => {
     const o = document.createElement('option');
-    o.value = l.id; o.textContent = `${l.label.tr} ($${l.pricePerSec}/sn)`;
-    if (l.id === 'standart') o.selected = true;
+    o.textContent = l.family === 'local'
+      ? `${l.label.tr} — $0`
+      : `${l.label.tr} ($${l.pricePerSec}/sn)`;
+    o.value = l.id;
     els.level.appendChild(o);
   });
 }
@@ -110,16 +133,43 @@ function buildEngines() {
   els.engine.innerHTML = '';
   META.engines.forEach((e) => {
     const o = document.createElement('option');
-    o.value = e.id; o.textContent = e.label.tr || e.label.en;
+    o.value = e.id;
+    const tag = e.free ? ' — ücretsiz' : (e.available === false ? ' — FAL_KEY gerekli' : '');
+    o.textContent = (e.label.tr || e.label.en) + tag;
+    if (e.available === false) o.disabled = true;
     if (e.id === META.defaults.engine) o.selected = true;
     els.engine.appendChild(o);
   });
 }
 
+// motor secimine gore seviye + sure listelerini esle
+function syncEngineUi() {
+  const eng = selectedEngine();
+  if (ENGINE_LEVEL[eng.id]) {
+    els.level.value = ENGINE_LEVEL[eng.id];
+    buildDurations(eng.id, ENGINE_DEFAULT_DUR[eng.id]);
+  } else {
+    const dedicated = Object.values(ENGINE_LEVEL);
+    if (dedicated.includes(els.level.value) || !els.level.value) els.level.value = 'standart';
+    buildDurations('fal', '8s');
+  }
+  updateCost();
+}
+
 function bindEvents() {
   ['change'].forEach((ev) => {
     [els.avatars, els.hooks].forEach((s) => s.addEventListener(ev, () => { updateVariantCount(); updateCost(); }));
-    [els.level, els.duration].forEach((s) => s.addEventListener(ev, updateCost));
+    els.duration.addEventListener(ev, updateCost);
+    els.level.addEventListener(ev, () => {
+      // seviyenin adanmis motoru varsa ona gec; yoksa kullanilabilir kuyruk motoruna (veo)
+      const lvl = META.levels.find((l) => l.id === els.level.value) || {};
+      const target = lvl.engine
+        ? META.engines.find((e) => e.id === lvl.engine)
+        : META.engines.find((e) => !ENGINE_LEVEL[e.id] && e.available !== false);
+      if (target && els.engine.value !== target.id) els.engine.value = target.id;
+      syncEngineUi();
+    });
+    els.engine.addEventListener(ev, syncEngineUi);
     els.language.addEventListener(ev, () => { buildStyles(); });
   });
   els.image.addEventListener('change', onUpload);
@@ -181,7 +231,10 @@ async function onProduce() {
   const product = els.product.value.trim();
   if (!product) { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = 'Ürün zorunlu.'; return; }
   const n = (+els.avatars.value) * (+els.hooks.value);
-  if (!confirm(`${n} varyant üretilecek. Tahmini maliyet ${els.costTotal.textContent}. Onaylıyor musun?`)) return;
+  const costNote = selectedEngine().free
+    ? `${n} varyant yerel motorla üretilecek (ücretsiz — CPU ile varyant başına ~1-2 dk sürer). Onaylıyor musun?`
+    : `${n} varyant üretilecek. Tahmini maliyet ${els.costTotal.textContent}. Onaylıyor musun?`;
+  if (!confirm(costNote)) return;
 
   els.produceBtn.disabled = true; els.produceBtn.textContent = 'Başlatılıyor…';
   try {
@@ -214,6 +267,7 @@ async function refreshCampaigns() {
     return `<div class="camp-tab ${c.id === activeCampaignId ? 'on' : ''}" data-id="${c.id}">
       <span class="dot ${dot}"></span>
       <span>${esc(c.product || 'Kampanya')} <small>(${c.counts.done}/${c.counts.total})</small></span>
+      ${c.demo ? '<span style="font-size:9px;font-weight:700;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:0 4px">DEMO</span>' : ''}
       ${c.topScore != null ? `<b style="color:var(--accent-2)">${c.topScore}</b>` : ''}
       <span class="del" data-del="${c.id}">✕</span>
     </div>`;

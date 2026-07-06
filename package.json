@@ -1,7 +1,7 @@
 {
   "name": "adforge",
   "version": "0.1.0",
-  "description": "AdForge — DTC/e-ticaret markalari icin tek urun fotografi + brief'ten 20 UGC reklam varyanti + performans raporu ureten yerel uygulama. fal.ai destekli.",
+  "description": "AdForge — DTC/e-ticaret markalari icin tek urun fotografi + brief'ten 20 UGC reklam varyanti + performans raporu ureten yerel uygulama. Varsayilan motor yerel/ucretsiz (edge-tts + ffmpeg + sharp); fal.ai opsiyonel.",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
@@ -14,6 +14,9 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "multer": "^2.2.0"
+    "ffmpeg-static": "^5.3.0",
+    "msedge-tts": "^2.0.6",
+    "multer": "^2.2.0",
+    "sharp": "^0.34.5"
   }
 }
