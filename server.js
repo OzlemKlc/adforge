@@ -12,6 +12,9 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 const FAL_KEY = process.env.FAL_KEY;
+// Ucretli (fal) motorlarda tek kampanyanin tahmini maliyet tavani. Kazara 64 varyantlik
+// ~$38'lik avatar/veo kampanyasini engeller. .env ile ayarlanabilir (varsayilan $5).
+const MAX_SPEND_USD = parseFloat(process.env.MAX_SPEND_USD || '5');
 if (!FAL_KEY) {
   console.log('\n[BILGI] FAL_KEY yok — yerel motor (faceless) aktif, fal.ai motorlari kapali. Bu normal ve ücretsizdir.');
 }
@@ -31,11 +34,28 @@ const demo = require('./lib/demo');
 const app = express();
 app.use(express.json({ limit: '4mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
-// yerel depolama: yuklenen urun gorselleri + render ciktilari
-app.use('/uploads', express.static(store.UPLOADS_DIR));
+// yerel depolama: yuklenen urun gorselleri + render ciktilari.
+// Guvenlik: yuklenen icerik tarayicida CALISTIRILMAMALI (HTML/SVG -> XSS). Bu yuzden
+// /uploads her yaniti indirilebilir ek (attachment) + sniff kapali olarak sunar.
+const safeUploadHeaders = (res) => {
+  res.setHeader('Content-Disposition', 'attachment');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Content-Security-Policy', "default-src 'none'");
+};
+app.use('/uploads', express.static(store.UPLOADS_DIR, { setHeaders: safeUploadHeaders }));
 app.use('/renders', express.static(store.RENDERS_DIR));
 
-const upload = multer({ dest: store.UPLOADS_DIR, limits: { fileSize: 25 * 1024 * 1024 } });
+// Yalniz gorsel kabul et — tur allowlist (hem MIME hem uzanti). SVG kasitli DISARIDA:
+// icinde script tasiyabilir; raster formatlar guvenli.
+const ALLOWED_IMAGE = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+const upload = multer({
+  dest: store.UPLOADS_DIR,
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_IMAGE[file.mimetype]) return cb(null, true);
+    cb(new Error('Sadece JPG, PNG, WebP veya GIF görsel yüklenebilir.'));
+  },
+});
 
 // --- meta & saglik ---
 app.get('/api/health', (req, res) => {
@@ -73,16 +93,21 @@ app.get('/api/cost', (req, res) => {
 
 // --- urun gorseli yukle (YEREL disk — fal'a gitmez; fal motoru gerekirse
 //     pipeline lazy olarak CDN'e yukler) ---
-app.post('/api/upload', upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'Dosya yok' });
-    const ext = (path.extname(req.file.originalname) || '.jpg').toLowerCase();
-    const name = `${path.basename(req.file.path)}${ext}`;
-    fs.renameSync(req.file.path, path.join(store.UPLOADS_DIR, name));
-    res.json({ url: `/uploads/${name}` });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+app.post('/api/upload', (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    // multer fileFilter/limit hatasi -> 400 (allowlist disi tur veya cok buyuk)
+    if (err) return res.status(400).json({ error: err.message });
+    try {
+      if (!req.file) return res.status(400).json({ error: 'Dosya yok' });
+      // uzanti DOGRULANMIS MIME'den turetilir (orijinal isim degil) — .html/.svg sizamaz
+      const ext = ALLOWED_IMAGE[req.file.mimetype];
+      const name = `${path.basename(req.file.path)}${ext}`;
+      fs.renameSync(req.file.path, path.join(store.UPLOADS_DIR, name));
+      res.json({ url: `/uploads/${name}` });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
 });
 
 // --- kampanya olustur + uretimi baslat ---
@@ -110,7 +135,7 @@ app.post('/api/campaigns', (req, res) => {
     const config = {
       avatars: clampInt(b.avatars, 1, 8, 2),
       hooks: clampInt(b.hooks, 1, 8, 5),
-      styles: Array.isArray(b.styles) && b.styles.length ? b.styles : [defaultStyle().id],
+      styles: Array.isArray(b.styles) && b.styles.length ? b.styles.slice(0, 8) : [defaultStyle().id],
       level,
       duration: b.duration || DEFAULT_DURATION[eng.id] || '8s',
       engine: eng.id,
@@ -119,6 +144,15 @@ app.post('/api/campaigns', (req, res) => {
     const cost = estimateCampaign({
       avatars: config.avatars, hooks: config.hooks, styleCount: config.styles.length, level: config.level, duration: config.duration,
     });
+
+    // SUNUCU TARAFI HARCAMA KORUMASI (frontend confirm() curl ile atlanabilir).
+    // Ucretli motorlarda tahmini toplam esigi asarsa uretimi baslatma.
+    if (engineNeedsFal(eng) && cost.total > MAX_SPEND_USD) {
+      return res.status(402).json({
+        error: `Tahmini maliyet $${cost.total.toFixed(2)}, izin verilen üst sınır $${MAX_SPEND_USD.toFixed(2)}. Varyant sayısını azalt veya MAX_SPEND_USD değerini artır.`,
+        estimated: cost.total, cap: MAX_SPEND_USD,
+      });
+    }
 
     const campaign = store.createCampaign({
       brand: { name: (b.brandName || '').trim(), language: b.language === 'en' ? 'en' : 'tr' },
@@ -150,20 +184,30 @@ app.get('/api/campaigns', (req, res) => {
   res.json(store.listCampaigns().map(summary));
 });
 
+// ID format guvenligi: campaignId (cmp_hex) ve variantId (var_hex) fs yollarina
+// giriyor; yol geciskenligini (path traversal) engellemek icin bicimi dogrula.
+const ID_RE = /^(cmp|var|demo)_[a-f0-9]+$/;
+function validIds(...ids) {
+  return ids.every((id) => typeof id === 'string' && ID_RE.test(id));
+}
+
 app.get('/api/campaigns/:id', (req, res) => {
+  if (!validIds(req.params.id)) return res.status(400).json({ error: 'Geçersiz kampanya kimliği' });
   const c = store.readCampaign(req.params.id);
   if (!c) return res.status(404).json({ error: 'Kampanya bulunamadı' });
   res.json(c);
 });
 
 app.delete('/api/campaigns/:id', (req, res) => {
+  if (!validIds(req.params.id)) return res.status(400).json({ error: 'Geçersiz kampanya kimliği' });
   store.deleteCampaign(req.params.id);
-  // yerel render ciktilarnii da temizle (disk sismesin)
+  // yerel render ciktilarini da temizle (disk sismesin)
   fs.rmSync(path.join(store.RENDERS_DIR, req.params.id), { recursive: true, force: true });
   res.json({ ok: true });
 });
 
 app.post('/api/campaigns/:id/variants/:vid/retry', (req, res) => {
+  if (!validIds(req.params.id, req.params.vid)) return res.status(400).json({ error: 'Geçersiz kimlik' });
   const v = store.getVariant(req.params.id, req.params.vid);
   if (!v) return res.status(404).json({ error: 'Varyant bulunamadı' });
   pipeline.retryVariant(req.params.id, req.params.vid);
