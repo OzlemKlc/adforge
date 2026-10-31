@@ -71,6 +71,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Conventional health endpoint for hosting platforms and uptime monitors.
+app.get('/health', (req, res) => {
+  res.json({ ok: true, service: 'adforge', version: require('./package.json').version });
+});
+
 app.get('/api/meta', (req, res) => {
   res.json({
     styles: listStyles().map((s) => ({ id: s.id, label: s.label, desc: s.desc, isDefault: !!s.isDefault })),

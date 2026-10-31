@@ -30,13 +30,13 @@ const TREAT = [
 ];
 
 const STATUS_LABEL = {
-  pending: 'Sırada', composing: 'Sahne', animating: 'Video', subtitling: 'Altyazı',
-  scoring: 'Skor', completed: 'Hazır', partial: 'Kısmi', rejected: 'Reddedildi',
-  mcp_error: 'fal hazır, çekilemedi', error: 'Hata',
+  pending: 'Queued', composing: 'Scene', animating: 'Video', subtitling: 'Captions',
+  scoring: 'Scoring', completed: 'Ready', partial: 'Partial', rejected: 'Rejected',
+  mcp_error: 'fal.ai ready, retrieval failed', error: 'Error',
 };
 const ANGLE_LABEL = {
-  curiosity: 'merak', testimonial: 'itiraf', pain: 'sıkıntı', bold_result: 'iddia',
-  social_proof: 'sosyal kanıt', mistake: 'hata', question: 'soru', demo: 'demo', problem: 'problem',
+  curiosity: 'curiosity', testimonial: 'testimonial', pain: 'pain point', bold_result: 'bold result',
+  social_proof: 'social proof', mistake: 'mistake', question: 'question', demo: 'demo', problem: 'problem',
 };
 
 // ---------- init ----------
@@ -59,10 +59,10 @@ async function init() {
 async function checkHealth() {
   try {
     const j = await (await fetch('/api/health')).json();
-    const fal = j.falKey === 'present' ? 'fal.ai bağlı ✓' : 'fal.ai: yok (opsiyonel)';
-    els.health.textContent = `yerel motor hazır ✓ · ${fal} · hook/skor: ${j.llm ? 'LLM' : 'şablon'}`;
+    const fal = j.falKey === 'present' ? 'fal.ai connected ✓' : 'fal.ai unavailable (optional)';
+    els.health.textContent = `local engine ready ✓ · ${fal} · hooks/scoring: ${j.llm ? 'LLM' : 'rules'}`;
     els.health.className = 'health ok';
-  } catch { els.health.textContent = 'sunucu yok'; els.health.className = 'health bad'; }
+  } catch { els.health.textContent = 'server unavailable'; els.health.className = 'health bad'; }
 }
 
 function buildStyles() {
@@ -97,9 +97,9 @@ function buildNumberSelect(sel, lo, hi, def) {
 // motor <-> seviye <-> sure eslesmesi
 // faceless: 15-30 sn ucretsiz; avatar: ~10-15 sn (gercek sure = ses uzunlugu); veo: 6-12 sn
 const DURATIONS = {
-  faceless: [['15s', '15 sn'], ['20s', '20 sn'], ['25s', '25 sn'], ['30s', '30 sn']],
-  avatar: [['10s', '~10 sn (ses kadar)'], ['15s', '~15 sn (ses kadar)']],
-  fal: [['6s', '6 sn'], ['8s', '8 sn'], ['10', '10 sn'], ['12', '12 sn']],
+  faceless: [['15s', '15 sec'], ['20s', '20 sec'], ['25s', '25 sec'], ['30s', '30 sec']],
+  avatar: [['10s', '~10 sec (voice length)'], ['15s', '~15 sec (voice length)']],
+  fal: [['6s', '6 sec'], ['8s', '8 sec'], ['10', '10 sec'], ['12', '12 sec']],
 };
 const ENGINE_LEVEL = { faceless: 'yerel', avatar: 'avatar' };
 const ENGINE_DEFAULT_DUR = { faceless: '20s', avatar: '10s' };
@@ -123,8 +123,8 @@ function buildLevels() {
   META.levels.filter((l) => l.id !== 'uzun').forEach((l) => {
     const o = document.createElement('option');
     o.textContent = l.family === 'local'
-      ? `${l.label.tr} — $0`
-      : `${l.label.tr} ($${l.pricePerSec}/sn)`;
+      ? `${l.label.en || l.label.tr} — $0`
+      : `${l.label.en || l.label.tr} ($${l.pricePerSec}/sec)`;
     o.value = l.id;
     els.level.appendChild(o);
   });
@@ -135,8 +135,8 @@ function buildEngines() {
   META.engines.forEach((e) => {
     const o = document.createElement('option');
     o.value = e.id;
-    const tag = e.free ? ' — ücretsiz' : (e.available === false ? ' — FAL_KEY gerekli' : '');
-    o.textContent = (e.label.tr || e.label.en) + tag;
+    const tag = e.free ? ' — free' : (e.available === false ? ' — requires FAL_KEY' : '');
+    o.textContent = (e.label.en || e.label.tr) + tag;
     if (e.available === false) o.disabled = true;
     if (e.id === META.defaults.engine) o.selected = true;
     els.engine.appendChild(o);
@@ -185,7 +185,7 @@ function bindEvents() {
 
 async function onDemo() {
   els.produceMsg.textContent = ''; els.produceMsg.className = 'msg';
-  els.demoBtn.disabled = true; els.demoBtn.textContent = 'Demo oluşturuluyor…';
+  els.demoBtn.disabled = true; els.demoBtn.textContent = 'Creating demo…';
   try {
     const body = {
       brandName: els.brandName.value.trim(), language: els.language.value,
@@ -196,13 +196,13 @@ async function onDemo() {
     const j = await (await fetch('/api/demo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
     if (j.campaignId) {
       els.produceMsg.className = 'msg success';
-      els.produceMsg.textContent = 'Demo kampanyası hazır (20 örnek varyant + rapor). Sağ panelde.';
+      els.produceMsg.textContent = 'Demo campaign ready (20 sample variants plus report). See the right panel.';
       activeCampaignId = j.campaignId;
       await refreshCampaigns();
       loadDetail(j.campaignId);
     } else { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = j.error || 'Hata'; }
   } catch (e) { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = e.message; }
-  finally { els.demoBtn.disabled = false; els.demoBtn.textContent = '✨ Demo kampanyası oluştur (anahtarsız)'; }
+  finally { els.demoBtn.disabled = false; els.demoBtn.textContent = '✨ Create demo campaign (no API key)'; }
 }
 
 function updateVariantCount() {
@@ -217,18 +217,18 @@ async function updateCost() {
   try {
     const j = await (await fetch('/api/cost?' + q)).json();
     els.costTotal.textContent = `$${j.total.toFixed(2)}`;
-    els.costBreakdown.textContent = `${j.variants} varyant · sahne $${j.breakdown.compose} + video $${j.breakdown.video} + altyazı $${j.breakdown.subtitle} · ~$${j.perVariant}/varyant`;
+    els.costBreakdown.textContent = `${j.variants} variants · scene $${j.breakdown.compose} + video $${j.breakdown.video} + captions $${j.breakdown.subtitle} · ~$${j.perVariant}/variant`;
   } catch {}
 }
 
 async function onUpload() {
   const f = els.image.files[0];
   if (!f) { uploadedImageUrl = null; els.imageStatus.textContent = ''; return; }
-  els.imageStatus.textContent = 'Yükleniyor…';
+  els.imageStatus.textContent = 'Uploading…';
   const fd = new FormData(); fd.append('file', f);
   try {
     const j = await (await fetch('/api/upload', { method: 'POST', body: fd })).json();
-    if (j.url) { uploadedImageUrl = j.url; els.imageStatus.textContent = 'Yüklendi ✓'; }
+    if (j.url) { uploadedImageUrl = j.url; els.imageStatus.textContent = 'Uploaded ✓'; }
     else els.imageStatus.textContent = 'Hata: ' + (j.error || '?');
   } catch (e) { els.imageStatus.textContent = 'Hata: ' + e.message; }
 }
@@ -236,14 +236,14 @@ async function onUpload() {
 async function onProduce() {
   els.produceMsg.textContent = ''; els.produceMsg.className = 'msg';
   const product = els.product.value.trim();
-  if (!product) { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = 'Ürün zorunlu.'; return; }
+  if (!product) { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = 'Product is required.'; return; }
   const n = (+els.avatars.value) * (+els.hooks.value);
   const costNote = selectedEngine().free
-    ? `${n} varyant yerel motorla üretilecek (ücretsiz — CPU ile varyant başına ~1-2 dk sürer). Onaylıyor musun?`
-    : `${n} varyant üretilecek. Tahmini maliyet ${els.costTotal.textContent}. Onaylıyor musun?`;
+    ? `${n} variants will use the local engine (free — about 1–2 CPU minutes per variant). Continue?`
+    : `${n} variants will be generated. Estimated cost: ${els.costTotal.textContent}. Continue?`;
   if (!confirm(costNote)) return;
 
-  els.produceBtn.disabled = true; els.produceBtn.textContent = 'Başlatılıyor…';
+  els.produceBtn.disabled = true; els.produceBtn.textContent = 'Starting…';
   try {
     const body = {
       brandName: els.brandName.value.trim(), language: els.language.value,
@@ -256,13 +256,13 @@ async function onProduce() {
     const j = await (await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
     if (j.campaignId) {
       els.produceMsg.className = 'msg success';
-      els.produceMsg.textContent = `Kampanya başladı (${n} varyant). Sağ panelde takip et.`;
+      els.produceMsg.textContent = `Campaign started (${n} variants). Follow progress in the right panel.`;
       activeCampaignId = j.campaignId;
       await refreshCampaigns();
       loadDetail(j.campaignId);
     } else { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = j.error || 'Hata'; }
   } catch (e) { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = e.message; }
-  finally { els.produceBtn.disabled = false; els.produceBtn.textContent = 'Kampanyayı üret'; }
+  finally { els.produceBtn.disabled = false; els.produceBtn.textContent = 'Generate campaign'; }
 }
 
 // ---------- rakip arastirmasi onizleme ----------
@@ -271,8 +271,8 @@ async function previewResearch() {
   if (!text) { els.researchPreview.innerHTML = ''; return; }
   try {
     const r = await (await fetch('/api/research/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ research: text }) })).json();
-    if (!r.total) { els.researchPreview.innerHTML = '<span class="hint">Henüz tanınan bir reklam metni yok.</span>'; return; }
-    els.researchPreview.innerHTML = `<span class="hint">${r.total} reklam · kanıtlanmış açılar (önce bunlar denenecek):</span> ` +
+    if (!r.total) { els.researchPreview.innerHTML = '<span class="hint">No recognizable ad copy yet.</span>'; return; }
+    els.researchPreview.innerHTML = `<span class="hint">${r.total} ads · evidence-backed angles (tested first):</span> ` +
       r.angles.slice(0, 5).map((a) => `<span class="achip">${esc(ANGLE_LABEL[a.angle] || a.angle)} · ${a.count}</span>`).join('');
   } catch { els.researchPreview.innerHTML = ''; }
 }
@@ -291,7 +291,7 @@ async function refreshCampaigns() {
       ${c.topScore != null ? `<b style="color:var(--accent-2)">${c.topScore}</b>` : ''}
       <span class="del" data-del="${c.id}">✕</span>
     </div>`;
-  }).join('') || '<small class="hint">Henüz kampanya yok.</small>';
+  }).join('') || '<small class="hint">No campaigns yet.</small>';
 
   els.campList.querySelectorAll('.camp-tab').forEach((t) => {
     t.addEventListener('click', (e) => {
@@ -302,7 +302,7 @@ async function refreshCampaigns() {
   els.campList.querySelectorAll('[data-del]').forEach((d) => {
     d.addEventListener('click', async (e) => {
       e.stopPropagation();
-      if (!confirm('Kampanyayı sil?')) return;
+      if (!confirm('Delete this campaign?')) return;
       await fetch('/api/campaigns/' + d.dataset.del, { method: 'DELETE' });
       if (activeCampaignId === d.dataset.del) { activeCampaignId = null; els.variants.innerHTML = '<div class="empty">Kampanya silindi.</div>'; els.report.classList.add('hidden'); }
       refreshCampaigns();
@@ -336,10 +336,10 @@ function renderReport(c) {
   if (!r || !r.ranked || !r.ranked.length) {
     els.report.classList.remove('hidden');
     els.report.innerHTML = `<h3>Performans raporu</h3>
-      <div class="progress">Üretiliyor… ${done}/${total} varyant hazır
+      <div class="progress">Generating… ${done}/${total} variants ready
         <div class="bar"><span style="width:${pct}%"></span></div>
       </div>
-      <div class="summary" style="color:var(--muted)">Tüm varyantlar bittiğinde sıralama ve kazanan burada görünecek.</div>`;
+      <div class="summary" style="color:var(--muted)">Ranking and the predicted winner will appear when all variants finish.</div>`;
     return;
   }
   const byId = Object.fromEntries(c.variants.map((v) => [v.id, v]));
@@ -363,12 +363,12 @@ function renderReport(c) {
 // --- arastirma ozeti (rapor ustu) ---
 function researchSummaryHTML(research) {
   if (!research || !research.angles || !research.angles.length) return '';
-  return `<div class="research-sum">🔎 ${research.total} rakip reklamdan kanıtlanmış açılar: ${research.angles.slice(0, 5)
+  return `<div class="research-sum">🔎 Evidence-backed angles from ${research.total} competitor ads: ${research.angles.slice(0, 5)
     .map((a) => `<span class="achip">${esc(ANGLE_LABEL[a.angle] || a.angle)} · ${a.count}</span>`).join('')}</div>`;
 }
 
 // --- ogrenme: gercek kazanan + tahmin isabeti ---
-const BASIS_LABEL = { cpa: 'en düşük CPA', conversionRate: 'en yüksek dönüşüm', ctr: 'en yüksek CTR' };
+const BASIS_LABEL = { cpa: 'lowest CPA', conversionRate: 'highest conversion rate', ctr: 'highest CTR' };
 function learningHTML(learning, byId) {
   if (!learning || !learning.realWinner) return '';
   const w = learning.realWinner;
@@ -376,11 +376,11 @@ function learningHTML(learning, byId) {
   const m = w.metrics || {};
   const pct = (x) => (x == null ? '—' : (x * 100).toFixed(2) + '%');
   return `<div class="learning ${learning.predictionMatched ? 'match' : 'miss'}">
-    <b>Gerçek kazanan (${BASIS_LABEL[w.basis] || w.basis}):</b> ${esc((v.hook && v.hook.hookLine) || w.angle || '')}
-    <div class="lm">CTR ${pct(m.ctr)} · Dönüşüm ${pct(m.cvr)} · CPA ${m.cpa == null ? '—' : m.cpa}</div>
+    <b>Actual winner (${BASIS_LABEL[w.basis] || w.basis}):</b> ${esc((v.hook && v.hook.hookLine) || w.angle || '')}
+    <div class="lm">CTR ${pct(m.ctr)} · Conversion ${pct(m.cvr)} · CPA ${m.cpa == null ? '—' : m.cpa}</div>
     <div class="lm">${learning.predictionMatched
-      ? '✓ Tahmin doğru çıktı: skorlayıcı da bu varyantı seçmişti.'
-      : '✗ Tahmin farklıydı. Bu sonuç, sonraki kampanyalarda açı ağırlıklarını güncelleyecek.'}</div>
+      ? '✓ Prediction matched: the scorer selected this variant.'
+      : '✗ Prediction differed. This result will update angle weights in future campaigns.'}</div>
   </div>`;
 }
 
@@ -390,9 +390,9 @@ function resultsFormHTML(c) {
   if (!done.length) return '';
   const n = (x) => (x == null ? '' : x);
   return `<details class="results">
-    <summary>📊 Gerçek reklam sonuçlarını gir <small class="hint">(öğrenme döngüsü)</small></summary>
-    <p class="hint">Reklam yöneticisindeki rakamları gir. Gösterimi az olan varyantlar karar dışı kalır; sonuçlar sonraki kampanyaların skorlamasını günceller.</p>
-    <table class="rtable"><thead><tr><th>Hook</th><th>Gösterim</th><th>Tık</th><th>Dönüşüm</th><th>Harcama</th></tr></thead><tbody>
+    <summary>📊 Enter actual ad results <small class="hint">(learning loop)</small></summary>
+    <p class="hint">Enter metrics from your ad manager. Low-impression variants are excluded; results update future campaign scoring.</p>
+    <table class="rtable"><thead><tr><th>Hook</th><th>Impressions</th><th>Clicks</th><th>Conversions</th><th>Spend</th></tr></thead><tbody>
     ${done.map((v) => `<tr data-vid="${v.id}">
       <td title="${esc((v.hook && v.hook.hookLine) || '')}">${esc((v.hook && v.hook.hookLine) || '').slice(0, 48)}<div class="rav">${esc((v.avatarLabel && (v.avatarLabel[c.brand?.language || 'tr'] || v.avatarLabel.tr)) || v.avatarId || '')}</div></td>
       <td><input type="number" min="0" name="impressions" value="${n(v.real?.impressions)}"></td>
@@ -401,7 +401,7 @@ function resultsFormHTML(c) {
       <td><input type="number" min="0" step="0.01" name="spend" value="${n(v.real?.spend)}"></td>
     </tr>`).join('')}
     </tbody></table>
-    <button type="button" id="saveResults" class="primary">Sonuçları kaydet</button>
+    <button type="button" id="saveResults" class="primary">Save results</button>
     <span id="resultsMsg" class="msg"></span>
   </details>`;
 }
@@ -416,7 +416,7 @@ function bindResultsForm(c) {
       return { variantId: tr.dataset.vid, impressions: val('impressions'), clicks: val('clicks'), conversions: val('conversions'), spend: val('spend') };
     }).filter((r) => r.impressions !== '');
     const msg = document.getElementById('resultsMsg');
-    if (!results.length) { msg.className = 'msg error'; msg.textContent = 'En az bir varyantın gösterimini gir.'; return; }
+    if (!results.length) { msg.className = 'msg error'; msg.textContent = 'Enter impressions for at least one variant.'; return; }
     btn.disabled = true;
     try {
       const j = await (await fetch(`/api/campaigns/${c.id}/results`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ results }) })).json();
@@ -429,7 +429,7 @@ function bindResultsForm(c) {
 function renderVariants(c) {
   const winnerId = c.report?.ranked?.[0]?.variantId;
   if (!c.variants.length) {
-    els.variants.innerHTML = `<div class="empty">Hook'lar hazırlanıyor…</div>`;
+    els.variants.innerHTML = `<div class="empty">Preparing hooks…</div>`;
     return;
   }
   const lang = c.brand?.language || 'tr';
@@ -451,14 +451,14 @@ function renderVariants(c) {
         <div class="vtags">
           <span class="vtag">${esc(avatarLabel)}</span>
           <span class="vtag">${ANGLE_LABEL[v.hook?.angle] || v.hook?.angle || ''}</span>
-          ${v.hook?.researchBacked ? `<span class="vtag research" title="${esc(v.hook.reference ? 'Referans: ' + v.hook.reference : 'Rakip araştırmasında kanıtlanmış açı')}">🔎 kanıtlanmış</span>` : ''}
+          ${v.hook?.researchBacked ? `<span class="vtag research" title="${esc(v.hook.reference ? 'Reference: ' + v.hook.reference : 'Angle validated by competitor research')}">🔎 evidence-backed</span>` : ''}
         </div>
-        ${v.real && v.real.impressions ? `<div class="vreal">CTR ${v.real.ctr == null ? '—' : (v.real.ctr * 100).toFixed(2) + '%'} · ${v.real.impressions} gösterim${v.real.enoughData ? '' : ' · az veri'}</div>` : ''}
+        ${v.real && v.real.impressions ? `<div class="vreal">CTR ${v.real.ctr == null ? '—' : (v.real.ctr * 100).toFixed(2) + '%'} · ${v.real.impressions} impressions${v.real.enoughData ? '' : ' · limited data'}</div>` : ''}
         <span class="vstatus ${v.status}">${STATUS_LABEL[v.status] || v.status}</span>
       </div>
       ${v.error ? `<div class="verror">${esc(v.error)}</div>` : ''}
       <div class="vactions">
-        ${url ? `<a href="${url}" target="_blank">Aç</a><a href="${url}" download="adforge-${v.id}.mp4">İndir</a>` : ''}
+        ${url ? `<a href="${url}" target="_blank">Open</a><a href="${url}" download="adforge-${v.id}.mp4">Download</a>` : ''}
         ${['error', 'rejected', 'mcp_error', 'partial'].includes(v.status) ? `<button data-retry="${v.id}">Yenile</button>` : ''}
       </div>
     </div>`;

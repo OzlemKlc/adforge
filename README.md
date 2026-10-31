@@ -2,6 +2,9 @@
 
 > Actively developed and maintained with [OpenAI Codex](https://openai.com/codex/).
 
+[![CI](https://github.com/OzlemKlc/adforge/actions/workflows/ci.yml/badge.svg?branch=codex%2Fresearch-and-learning-loop)](https://github.com/OzlemKlc/adforge/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 AdForge turns one product image and a short brief into multiple UGC-style ad variants, ranks the variants, and learns from real campaign results. It is designed for DTC and ecommerce teams that need systematic creative testing rather than a single generated asset.
 
 ## Highlights
@@ -89,3 +92,14 @@ Competitor research can be plain text with one ad per line or Winning Product Fi
 - If the repository is stored in OneDrive, keep `KEEP_TEMP=0` so intermediate rendering uses the system temporary directory.
 
 See [DEPLOY.md](./DEPLOY.md) for deployment guidance and [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution rules.
+
+## End-to-end Codex showcase
+
+AdForge is the production half of a two-project workflow:
+
+1. **Winning Product Finder** identifies durable products and high-performing hook patterns.
+2. Its JSON output is pasted into AdForge's competitor-research input.
+3. AdForge converts the evidence into distinct, non-copying scripts and video variants.
+4. Real impressions, clicks, conversions, and spend close the learning loop.
+
+See [SHOWCASE.md](./SHOWCASE.md) for a reproducible five-minute demo suitable for workshops and community events.

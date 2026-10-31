@@ -1,7 +1,7 @@
 {
   "name": "adforge",
-  "version": "0.1.0",
-  "description": "AdForge — DTC/e-ticaret markalari icin tek urun fotografi + brief'ten 20 UGC reklam varyanti + performans raporu ureten yerel uygulama. Varsayilan motor yerel/ucretsiz (edge-tts + ffmpeg + sharp); fal.ai opsiyonel.",
+  "version": "1.0.0",
+  "description": "Evidence-driven UGC ad variant engine with local rendering, OpenAI-assisted planning, and campaign learning.",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
@@ -12,12 +12,30 @@
   "engines": {
     "node": ">=18"
   },
+  "keywords": [
+    "openai",
+    "codex",
+    "ugc",
+    "advertising",
+    "video-generation",
+    "ecommerce"
+  ],
+  "author": "OzlemKlc",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OzlemKlc/adforge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OzlemKlc/adforge/issues"
+  },
+  "homepage": "https://github.com/OzlemKlc/adforge#readme",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "express": "^5.3.0",
     "ffmpeg-static": "^5.3.0",
     "msedge-tts": "^2.0.6",
     "multer": "^2.2.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.35.5"
   }
 }

@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>AdForge — Konsol</title>
+<title>AdForge — Campaign Console</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -11,60 +11,60 @@
   <div class="brand">
     <span class="logo">⚡</span>
     <span>Ad<b>Forge</b></span>
-    <em>UGC varyant motoru</em>
+    <em>UGC variant engine</em>
   </div>
   <div style="display:flex;align-items:center;gap:16px">
-    <a href="/" style="color:var(--muted);text-decoration:none;font-size:12px">← Anasayfa</a>
+    <a href="/" style="color:var(--muted);text-decoration:none;font-size:12px">← Home</a>
     <div id="health" class="health">…</div>
   </div>
 </header>
 
 <main>
-  <!-- SOL: yeni kampanya formu -->
+  <!-- New campaign form -->
   <section class="panel form-panel">
-    <h2>Yeni kampanya</h2>
+    <h2>New campaign</h2>
 
     <div class="row">
-      <label class="grow">Marka adı
-        <input id="brandName" type="text" placeholder="Örn: Glowly" />
+      <label class="grow">Brand name
+        <input id="brandName" type="text" placeholder="Example: Glowly" />
       </label>
-      <label>Dil
+      <label>Language
         <select id="language">
-          <option value="tr">Türkçe</option>
           <option value="en">English</option>
+          <option value="tr">Turkish</option>
         </select>
       </label>
     </div>
 
-    <label>Ürün *
-      <input id="product" type="text" placeholder="Örn: C vitamini yüz serumu" />
+    <label>Product *
+      <input id="product" type="text" placeholder="Example: vitamin C face serum" />
     </label>
 
-    <label>Öne çıkan fayda
-      <input id="benefit" type="text" placeholder="Örn: kuru cildi 3 haftada parlatır" />
+    <label>Primary benefit
+      <input id="benefit" type="text" placeholder="Example: brightens dry skin in three weeks" />
     </label>
 
     <div class="row">
-      <label class="grow">Hedef kitle
-        <input id="audience" type="text" placeholder="Örn: 25-40 yaş cilt bakımı meraklıları" />
+      <label class="grow">Target audience
+        <input id="audience" type="text" placeholder="Example: skincare enthusiasts aged 25–40" />
       </label>
     </div>
 
-    <label>Marka tonu
-      <input id="tone" type="text" placeholder="Örn: samimi, bilimsel, güven veren" />
+    <label>Brand tone
+      <input id="tone" type="text" placeholder="Example: friendly, scientific, trustworthy" />
     </label>
 
-    <label>Rakip araştırması <small class="hint">(opsiyonel — uzun süredir yayında olan rakip reklam metinleri, her biri ayrı satırda; ya da Winning Product Finder JSON çıktısı)</small>
-      <textarea id="research" rows="4" placeholder="Örn:&#10;Boyun ağrına 15 dakikada elveda.&#10;Gün boyu masada mı çalışıyorsun? Sırt ağrına son ver."></textarea>
+    <label>Competitor research <small class="hint">(optional — one long-running competitor ad per line, or Winning Product Finder JSON)</small>
+      <textarea id="research" rows="4" placeholder="Example:&#10;Say goodbye to neck pain in 15 minutes.&#10;Sitting at a desk all day? Give your back a break."></textarea>
       <div id="researchPreview" class="research-preview"></div>
     </label>
 
-    <label>Ürün görseli (tek fotoğraf)
+    <label>Product image (one photo)
       <input id="image" type="file" accept="image/*" />
       <small id="imageStatus" class="hint"></small>
     </label>
 
-    <label>Tarzlar <small class="hint">(varyantlara dağıtılır — birden fazla seç)</small>
+    <label>Styles <small class="hint">(distributed across variants — select more than one)</small>
       <div id="styles" class="chips"></div>
     </label>
 
@@ -75,54 +75,54 @@
       <label>Hook
         <select id="hooks"></select>
       </label>
-      <label class="grow">Varyant
+      <label class="grow">Variants
         <div id="variantCount" class="pill">10</div>
       </label>
     </div>
 
     <div class="row">
-      <label class="grow">Kalite
+      <label class="grow">Quality
         <select id="level"></select>
       </label>
-      <label>Süre
+      <label>Duration
         <select id="duration"><!-- motor secimine gore JS doldurur --></select>
       </label>
     </div>
 
-    <label>Üretim motoru
+    <label>Generation engine
       <select id="engine"></select>
     </label>
 
     <div class="cost-box">
-      <div class="cost-main"><span>Tahmini maliyet</span><strong id="costTotal">—</strong></div>
+      <div class="cost-main"><span>Estimated cost</span><strong id="costTotal">—</strong></div>
       <small id="costBreakdown"></small>
     </div>
 
-    <button id="produceBtn" class="primary">Kampanyayı üret</button>
-    <button id="demoBtn" class="secondary">✨ Demo kampanyası oluştur (anahtarsız)</button>
+    <button id="produceBtn" class="primary">Generate campaign</button>
+    <button id="demoBtn" class="secondary">✨ Create demo campaign (no API key)</button>
     <div id="produceMsg" class="msg"></div>
   </section>
 
-  <!-- SAĞ: kampanya görünümü -->
+  <!-- Campaign view -->
   <section class="panel camp-panel">
     <div class="camp-head">
-      <h2>Kampanyalar</h2>
+      <h2>Campaigns</h2>
       <div id="campList" class="camp-list"></div>
     </div>
 
     <div id="report" class="report hidden"></div>
 
     <div id="variants" class="variants">
-      <div class="empty">Soldan bir kampanya başlat. 5 avatar × 4 hook = 20 varyant + performans raporu üretilir.</div>
+      <div class="empty">Start a campaign on the left. Five avatars × four hooks produces 20 variants and a performance report.</div>
     </div>
   </section>
 </main>
 
 <footer>
   <small>
-    AdForge — tek ürün fotoğrafı + brief → 20 UGC reklam varyantı + performans raporu.
-    Varsayılan motor yerel ve ücretsizdir (faceless: AI seslendirme + altyazı + ürün B-roll).
-    İsteğe bağlı: FAL_KEY ile Veo konuşan-avatar motoru da açılır.
+    AdForge — one product photo and a brief → 20 UGC ad variants plus a performance report.
+    The default engine is local and free (faceless AI voiceover, captions, and product B-roll).
+    Optional: add FAL_KEY to enable the Veo talking-avatar engine.
   </small>
 </footer>
 
