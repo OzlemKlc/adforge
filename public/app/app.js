@@ -4,6 +4,7 @@ const $ = (id) => document.getElementById(id);
 const els = {
   health: $('health'), brandName: $('brandName'), language: $('language'),
   product: $('product'), benefit: $('benefit'), audience: $('audience'), tone: $('tone'),
+  research: $('research'), researchPreview: $('researchPreview'),
   image: $('image'), imageStatus: $('imageStatus'), styles: $('styles'),
   avatars: $('avatars'), hooks: $('hooks'), variantCount: $('variantCount'),
   level: $('level'), duration: $('duration'), engine: $('engine'),
@@ -173,6 +174,11 @@ function bindEvents() {
     els.language.addEventListener(ev, () => { buildStyles(); });
   });
   els.image.addEventListener('change', onUpload);
+  let researchTimer = null;
+  els.research.addEventListener('input', () => {
+    clearTimeout(researchTimer);
+    researchTimer = setTimeout(previewResearch, 400);
+  });
   els.produceBtn.addEventListener('click', onProduce);
   els.demoBtn.addEventListener('click', onDemo);
 }
@@ -185,6 +191,7 @@ async function onDemo() {
       brandName: els.brandName.value.trim(), language: els.language.value,
       product: els.product.value.trim(), benefit: els.benefit.value.trim(),
       styles: [...selectedStyles],
+      research: els.research.value.trim() || undefined,
     };
     const j = await (await fetch('/api/demo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
     if (j.campaignId) {
@@ -244,6 +251,7 @@ async function onProduce() {
       styles: [...selectedStyles], avatars: +els.avatars.value, hooks: +els.hooks.value,
       level: els.level.value, duration: els.duration.value, engine: els.engine.value,
       productImageUrl: uploadedImageUrl,
+      research: els.research.value.trim() || undefined,
     };
     const j = await (await fetch('/api/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
     if (j.campaignId) {
@@ -255,6 +263,18 @@ async function onProduce() {
     } else { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = j.error || 'Hata'; }
   } catch (e) { els.produceMsg.className = 'msg error'; els.produceMsg.textContent = e.message; }
   finally { els.produceBtn.disabled = false; els.produceBtn.textContent = 'Kampanyayı üret'; }
+}
+
+// ---------- rakip arastirmasi onizleme ----------
+async function previewResearch() {
+  const text = els.research.value.trim();
+  if (!text) { els.researchPreview.innerHTML = ''; return; }
+  try {
+    const r = await (await fetch('/api/research/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ research: text }) })).json();
+    if (!r.total) { els.researchPreview.innerHTML = '<span class="hint">Henüz tanınan bir reklam metni yok.</span>'; return; }
+    els.researchPreview.innerHTML = `<span class="hint">${r.total} reklam · kanıtlanmış açılar (önce bunlar denenecek):</span> ` +
+      r.angles.slice(0, 5).map((a) => `<span class="achip">${esc(ANGLE_LABEL[a.angle] || a.angle)} · ${a.count}</span>`).join('');
+  } catch { els.researchPreview.innerHTML = ''; }
 }
 
 // ---------- kampanya listesi ----------
@@ -325,6 +345,7 @@ function renderReport(c) {
   const byId = Object.fromEntries(c.variants.map((v) => [v.id, v]));
   els.report.classList.remove('hidden');
   els.report.innerHTML = `<h3>Performans raporu ${r.scorer === 'predicted' ? '· AI tahmini' : ''}</h3>
+    ${researchSummaryHTML(r.research)}
     <div class="summary">${esc(r.summary || '')}</div>
     ${r.ranked.slice(0, 5).map((x) => {
       const v = byId[x.variantId] || {};
@@ -333,7 +354,76 @@ function renderReport(c) {
         <span>${esc((v.hook && v.hook.hookLine) || ANGLE_LABEL[x.angle] || x.angle || '')}</span>
         <span class="score">${x.value}</span>
       </div>`;
-    }).join('')}`;
+    }).join('')}
+    ${learningHTML(r.learning, byId)}
+    ${c.status === 'producing' || c.status === 'planning' ? '' : resultsFormHTML(c)}`;
+  bindResultsForm(c);
+}
+
+// --- arastirma ozeti (rapor ustu) ---
+function researchSummaryHTML(research) {
+  if (!research || !research.angles || !research.angles.length) return '';
+  return `<div class="research-sum">🔎 ${research.total} rakip reklamdan kanıtlanmış açılar: ${research.angles.slice(0, 5)
+    .map((a) => `<span class="achip">${esc(ANGLE_LABEL[a.angle] || a.angle)} · ${a.count}</span>`).join('')}</div>`;
+}
+
+// --- ogrenme: gercek kazanan + tahmin isabeti ---
+const BASIS_LABEL = { cpa: 'en düşük CPA', conversionRate: 'en yüksek dönüşüm', ctr: 'en yüksek CTR' };
+function learningHTML(learning, byId) {
+  if (!learning || !learning.realWinner) return '';
+  const w = learning.realWinner;
+  const v = byId[w.variantId] || {};
+  const m = w.metrics || {};
+  const pct = (x) => (x == null ? '—' : (x * 100).toFixed(2) + '%');
+  return `<div class="learning ${learning.predictionMatched ? 'match' : 'miss'}">
+    <b>Gerçek kazanan (${BASIS_LABEL[w.basis] || w.basis}):</b> ${esc((v.hook && v.hook.hookLine) || w.angle || '')}
+    <div class="lm">CTR ${pct(m.ctr)} · Dönüşüm ${pct(m.cvr)} · CPA ${m.cpa == null ? '—' : m.cpa}</div>
+    <div class="lm">${learning.predictionMatched
+      ? '✓ Tahmin doğru çıktı: skorlayıcı da bu varyantı seçmişti.'
+      : '✗ Tahmin farklıydı. Bu sonuç, sonraki kampanyalarda açı ağırlıklarını güncelleyecek.'}</div>
+  </div>`;
+}
+
+// --- gercek sonuc girisi (Meta/TikTok reklam yoneticisinden) ---
+function resultsFormHTML(c) {
+  const done = c.variants.filter((v) => v.status === 'completed');
+  if (!done.length) return '';
+  const n = (x) => (x == null ? '' : x);
+  return `<details class="results">
+    <summary>📊 Gerçek reklam sonuçlarını gir <small class="hint">(öğrenme döngüsü)</small></summary>
+    <p class="hint">Reklam yöneticisindeki rakamları gir. Gösterimi az olan varyantlar karar dışı kalır; sonuçlar sonraki kampanyaların skorlamasını günceller.</p>
+    <table class="rtable"><thead><tr><th>Hook</th><th>Gösterim</th><th>Tık</th><th>Dönüşüm</th><th>Harcama</th></tr></thead><tbody>
+    ${done.map((v) => `<tr data-vid="${v.id}">
+      <td title="${esc((v.hook && v.hook.hookLine) || '')}">${esc((v.hook && v.hook.hookLine) || '').slice(0, 48)}<div class="rav">${esc((v.avatarLabel && (v.avatarLabel[c.brand?.language || 'tr'] || v.avatarLabel.tr)) || v.avatarId || '')}</div></td>
+      <td><input type="number" min="0" name="impressions" value="${n(v.real?.impressions)}"></td>
+      <td><input type="number" min="0" name="clicks" value="${n(v.real?.clicks)}"></td>
+      <td><input type="number" min="0" name="conversions" value="${n(v.real?.conversions)}"></td>
+      <td><input type="number" min="0" step="0.01" name="spend" value="${n(v.real?.spend)}"></td>
+    </tr>`).join('')}
+    </tbody></table>
+    <button type="button" id="saveResults" class="primary">Sonuçları kaydet</button>
+    <span id="resultsMsg" class="msg"></span>
+  </details>`;
+}
+
+function bindResultsForm(c) {
+  const btn = document.getElementById('saveResults');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const rows = [...els.report.querySelectorAll('tr[data-vid]')];
+    const results = rows.map((tr) => {
+      const val = (name) => tr.querySelector(`[name=${name}]`).value;
+      return { variantId: tr.dataset.vid, impressions: val('impressions'), clicks: val('clicks'), conversions: val('conversions'), spend: val('spend') };
+    }).filter((r) => r.impressions !== '');
+    const msg = document.getElementById('resultsMsg');
+    if (!results.length) { msg.className = 'msg error'; msg.textContent = 'En az bir varyantın gösterimini gir.'; return; }
+    btn.disabled = true;
+    try {
+      const j = await (await fetch(`/api/campaigns/${c.id}/results`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ results }) })).json();
+      if (j.error) throw new Error(j.error);
+      await loadDetail(c.id, true);
+    } catch (e) { msg.className = 'msg error'; msg.textContent = e.message; btn.disabled = false; }
+  });
 }
 
 function renderVariants(c) {
@@ -361,7 +451,9 @@ function renderVariants(c) {
         <div class="vtags">
           <span class="vtag">${esc(avatarLabel)}</span>
           <span class="vtag">${ANGLE_LABEL[v.hook?.angle] || v.hook?.angle || ''}</span>
+          ${v.hook?.researchBacked ? `<span class="vtag research" title="${esc(v.hook.reference ? 'Referans: ' + v.hook.reference : 'Rakip araştırmasında kanıtlanmış açı')}">🔎 kanıtlanmış</span>` : ''}
         </div>
+        ${v.real && v.real.impressions ? `<div class="vreal">CTR ${v.real.ctr == null ? '—' : (v.real.ctr * 100).toFixed(2) + '%'} · ${v.real.impressions} gösterim${v.real.enoughData ? '' : ' · az veri'}</div>` : ''}
         <span class="vstatus ${v.status}">${STATUS_LABEL[v.status] || v.status}</span>
       </div>
       ${v.error ? `<div class="verror">${esc(v.error)}</div>` : ''}
