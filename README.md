@@ -1,82 +1,91 @@
-# AdForge — UGC reklam varyant motoru
+# AdForge
 
-> Aktif olarak [OpenAI Codex](https://openai.com/codex/) ile geliştiriliyor ve bakımı yapılıyor.
+> Actively developed and maintained with [OpenAI Codex](https://openai.com/codex/).
 
-DTC/e-ticaret markaları için: **tek ürün fotoğrafı + kısa brief → 10 UGC reklam varyantı + performans raporu.**
+AdForge turns one product image and a short brief into multiple UGC-style ad variants, ranks the variants, and learns from real campaign results. It is designed for DTC and ecommerce teams that need systematic creative testing rather than a single generated asset.
 
-Sıradan video araçlarından farkı tek varlık değil, A/B testi için onlarca varyant üretmesi ve hangisinin dönüşeceğine dair tahmini skor sunmasıdır. **Varsayılan motor tamamen yerel ve ücretsizdir** (API anahtarı gerektirmez); istenirse fal.ai motorları opsiyonel olarak açılır.
+## Highlights
 
-## Üç üretim motoru
+- Produces multiple hooks, scripts, visual styles, and presenter variants.
+- Runs locally without an API key using Edge TTS, FFmpeg, and Sharp.
+- Supports optional Kling avatar and fal.ai video engines.
+- Uses OpenAI for optional hook generation and predicted scoring.
+- Accepts competitor ads or Winning Product Finder JSON as research evidence.
+- Learns angle performance from impressions, clicks, conversions, and spend.
+- Adds an AI-generated disclosure to local and avatar videos by default.
+- Resumes interrupted campaigns without resubmitting completed paid jobs.
 
-| | `faceless` (varsayılan, YEREL) | `avatar` (hibrit, Kling) | `veo` (fal.ai) |
-|---|---|---|---|
-| Format | Ürün B-roll + hook + seslendirme + karaoke altyazı | **Fotogerçekçi konuşan avatar** (lipsync) + karaoke altyazı | Konuşan avatar (native ses) |
-| Maliyet | **$0** | **~$0.60-0.90/video** (sahne $0.04 + $0.056/sn; ses+altyazı yerel $0) | ~$1.20+ / 8 sn |
-| Süre | 15–30 sn | ses uzunluğu kadar (~8-15 sn) | 4–15 sn |
-| Gereksinim | Anahtar yok | `FAL_KEY` | `FAL_KEY` |
-| Ses | Edge neural TR/EN (8 persona, rate/pitch) | Aynı Edge sesleri (tam kontrol) | Veo native |
-| Altyazı | Karaoke, WordBoundary senkron | Karaoke, WordBoundary senkron | fal auto-subtitle |
+## Production engines
 
-**Önerilen akış (kazanan hunisi):** hook/script varyantlarını `faceless` ile $0'a test et → kazanan 1-2 hook'u `avatar` ile üst seviye üret. 20 varyantlık testin toplam maliyeti ~$1.20 olur (hepsini avatar'la üretmek ~$12-18 olurdu).
+| Engine | Output | Estimated cost | Requirements |
+|---|---|---:|---|
+| `faceless` | Product B-roll, voiceover, karaoke captions | $0 | None |
+| `avatar` | Photorealistic talking avatar with local voice and captions | ~$0.60–0.90/video | `FAL_KEY` |
+| `veo` | Native generated video and audio | ~$1.20+/8 seconds | `FAL_KEY` |
 
-## Nasıl çalışır: araştırma → üretim → test → öğrenme
+Recommended workflow: validate many hooks with the free `faceless` engine, then produce the strongest one or two hooks with `avatar`.
 
+## Pipeline
+
+```text
+RESEARCH  competitor ads or Winning Product Finder output -> proven angles
+PLAN      brief and evidence -> distinct hooks and scripts
+COMPOSE   product image -> visual scenes
+ANIMATE   local FFmpeg/TTS or optional hosted video engine
+SUBTITLE  synchronized karaoke captions
+SCORE     heuristic or optional OpenAI scoring -> ranked variants
+LEARN     real ad results -> winner and reusable angle weights
 ```
-0) RESEARCH  rakip reklam metinleri / Winning Product Finder çıktısı → kanıtlanmış açılar
-1) PLAN      brief (+ kanıtlanmış açılar) → N farklı hook/script (TR veya EN)
-2) COMPOSE   ürün fotoğrafı → her (avatar × tarz) için sahne görselleri
-             yerel: sharp (hero/close/detail/card)   fal: nano-banana
-3) ANIMATE   her (avatar × hook) → video
-             yerel: edge-tts + ffmpeg zoompan + .ass burn   fal: Veo 3.1 / Seedance
-4) SUBTITLE  fal yolu: auto-subtitle. Yerel yol: altyazı 3. aşamada gömülür, atlanır.
-5) SCORE     her varyant → 0-100 skor + sıralama + kazanan
-             (OPENAI_API_KEY varsa LLM, yoksa kural tabanlı yerel skorer)
-6) LEARN     gerçek reklam sonuçları (gösterim/tık/dönüşüm/harcama) → gerçek kazanan
-             + açı bazında öğrenilen ağırlıklar → bir sonraki kampanyanın skorlaması
+
+The learning priority is: real campaign evidence, competitor research evidence, then default angle weights. Variants below `LEARN_MIN_IMPRESSIONS` are excluded from learning to reduce small-sample bias.
+
+## Quick start
+
+Requirements: Node.js 18+ and FFmpeg.
+
+```bash
+npm install
+npm test
+npm start
 ```
 
-### 0) Rakip araştırması (opsiyonel)
+Open <http://localhost:3000/app/>. The default local engine works without API keys.
 
-Formdaki **Rakip araştırması** alanına uzun süredir yayında olan rakip reklam metinlerini (her biri ayrı satırda) ya da **Winning Product Finder** JSON çıktısını yapıştır. `lib/research.js` her reklamın hangi psikolojik açıyı kullandığını kural tabanlı çıkarır (Türkçe + İngilizce, API'siz). Ağırlıklandırma reklamın gücüne göre yapılır: WPF skoru varsa o, yoksa yayında kalma süresi. Planner kanıtlanmış açıları önce dener; LLM açıksa rakip hook'ları **mekanizmayı öğrenmek için** referans olarak alır, metni kopyalaması açıkça yasaktır. Her hook'ta `researchBacked` ve dayandığı rakip açılışı (`reference`) görünür.
+For optional services:
 
-### 6) Öğrenme döngüsü
+```bash
+cp .env.example .env
+```
 
-Varyantlar yayına girince raporun altındaki **Gerçek reklam sonuçlarını gir** tablosuna reklam yöneticisindeki rakamları gir (ya da `POST /api/campaigns/:id/results`).
+- `OPENAI_API_KEY`: OpenAI hook generation and predicted scoring.
+- `FAL_KEY`: avatar and Veo/Seedance engines.
+- `PLANNER_MODE`: `auto`, `template`, or `llm`.
 
-- **Gerçek kazanan:** dönüşüm ve harcama varsa en düşük CPA, yoksa en yüksek CTR. Rapor, tahminin tutup tutmadığını da gösterir.
-- **Küçük örneklem koruması:** `LEARN_MIN_IMPRESSIONS` (varsayılan 1000) altındaki varyant ya da açı karar dışı kalır. Tek bir şanslı varyant stratejiyi yönlendiremez.
-- **Öğrenilen ağırlıklar:** tüm kampanyalardaki sonuçlar açı bazında toplanır (`GET /api/learnings`). Yeterli veri biriken açılar için skorlayıcı, elle yazılmış ağırlık tablosu yerine markanın **kendi** verisini kullanır. Öncelik: öğrenilmiş > araştırmada kanıtlanmış > varsayılan. Skor gerekçesinde kaynak yazılır.
+## Research and learning APIs
 
-Varsayılan: **5 hook × 2 avatar = 10 varyant.** (v1; formdan ayarlanabilir)
+- `POST /api/campaigns/:id/results`: save impressions, clicks, conversions, and spend.
+- `GET /api/learnings`: return aggregated performance by psychological angle.
 
-## Kurulum
+Competitor research can be plain text with one ad per line or Winning Product Finder JSON. Research is processed locally with deterministic Turkish and English pattern detection. When OpenAI is enabled, evidence is included as context without instructing the model to copy competitor text.
 
-1. `npm install` (testler: `npm test`, bağımlılıksız `node:test`)
-2. `npm start` → <http://localhost:3000> — **anahtar olmadan üretim yapar** (yerel motor).
-3. (Opsiyonel) `.env.example` → `.env` kopyala: `FAL_KEY` (veo motoru), `OPENAI_API_KEY` (LLM hook/skor), TTS ses/Piper ayarları.
+## Extension points
 
-> **OneDrive notu:** Proje OneDrive altındaysa `data/` klasörünü "Bu cihazda her zaman tut" yap; render sırasında eşitleme kilidi yaşarsan `KEEP_TEMP=0` kalsın ve `data/renders`'ı OneDrive eşitlemesinden hariç tutmayı düşün.
+| Capability | Location |
+|---|---|
+| Visual styles | `lib/styles.js` |
+| Presenter personas | `lib/avatars.js` |
+| Production engines | `lib/engines/` |
+| Scorers | `lib/scorers/` |
+| Model and pricing registry | `lib/models.js` |
+| Competitor research | `lib/research.js` |
+| Campaign learning | `lib/learnings.js` |
 
-## Mimari ve genişleme noktaları
+## Operational notes
 
-Her şey **registry** desenli — yeni özellik = tek dosya/nesne:
+- API keys belong only in `.env`; never commit them.
+- Paid generation is protected by a server-side spending limit.
+- The application is intended for localhost by default. Add authentication and billing controls before a public deployment.
+- `faceless` and `avatar` videos include an AI disclosure. Customize it with `AI_DISCLOSURE`; use `off` only after checking the applicable platform rules.
+- If the repository is stored in OneDrive, keep `KEEP_TEMP=0` so intermediate rendering uses the system temporary directory.
 
-| Eklemek istediğin | Dosya | Nasıl |
-|---|---|---|
-| Yeni **tarz** | `lib/styles.js` | `STYLES`'a bir nesne ekle |
-| Yeni **avatar** | `lib/avatars.js` | `AVATARS`'a bir nesne ekle (sonra: `source:'uploaded'`) |
-| Yeni **üretim motoru** | `lib/engines/` | Arayüzü implement et + `engines/index.js`'e ekle |
-| Yeni **skorlayıcı** | `lib/scorers/` | Arayüzü implement et + `scorers/index.js`'e ekle |
-| Model/fiyat | `lib/models.js` | Sabit havuz — tek kaynak |
-
-**Yol haritası:** v1 = Veo motoru + AI tahmini skor. v2 = zincir motoru (görsel→TTS→lipsync ekonomi katmanı, `lib/engines/chain.js`) + gerçek platform skorlayıcısı (Meta/TikTok, `lib/scorers/platform.js`) — ikisi de mevcut arayüzlere takılır, omurga değişmez.
-
-## Önemli notlar
-
-- **AI içerik etiketi:** `faceless` ve `avatar` motorlarında her videonun sol üst köşesine, videonun tamamı boyunca "Yapay zeka ile üretilmiştir" (EN: "AI-generated") basılır. `AI_DISCLOSURE` ile metin değiştirilebilir; `off` kapatır (kapatmak önerilmez, yayın kurallarını kontrol et). **`veo` motorunda** altyazı fal.ai tarafında üretildiği için etiket otomatik basılmaz; yayından önce platformun AI içerik işaretini kullan ya da etiketi kurguda ekle.
-
-- **Doğrulama:** fal endpoint ID/fiyatları 2026-05'te doğrulandı; fal revize edebilir. İlk gerçek çalıştırmada bir varyant üretip doğrula (`lib/models.js` tek değişiklik noktası).
-- **Maliyet onayı:** Üretim öncesi canlı maliyet gösterilir ve onay istenir.
-- **Hata modları:** 422 (prompt reddedildi, para kesilmez) ve 500 (video üretildi ama çekilemedi) varyant bazında yakalanır; diğer varyantlar etkilenmez.
-- **Resume:** Sunucu yeniden başlarsa yarım kalan varyantlar kaldığı yerden devam eder (pahalı video yeniden submit edilmez).
-- **Güvenlik:** API anahtarları sadece `.env`'de. App yalnızca localhost. Public deploy için kimlik doğrulama + ödeme katmanı eklenmeli.
+See [DEPLOY.md](./DEPLOY.md) for deployment guidance and [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution rules.

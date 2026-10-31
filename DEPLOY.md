@@ -1,35 +1,29 @@
-# AdForge — Dağıtım (Deploy) Notları
+# Deployment
 
-AdForge iki parçadan oluşur ve **farklı yerlere** dağıtılır:
+AdForge has two deployment targets:
 
-| Parça | Nerede | Durum |
-|------|--------|-------|
-| **Landing page** (statik: `public/index.html`) | **Vercel** | Tam uyumlu |
-| **Uygulama** (`server.js` + fal hattı + konsol `/app/`) | **Railway / Render** veya lokal | Kalıcı sunucu gerekir |
+| Component | Recommended target | Notes |
+|---|---|---|
+| Static landing page in `public/` | Vercel or Netlify | No persistent backend required |
+| Application server and rendering pipeline | Railway, Render, or a local machine | Requires a persistent process and storage |
 
-## Neden uygulama Vercel'de çalışmaz?
-Vercel serverless'tir: fonksiyonlar kısa sürede biter, kalıcı disk yoktur, HTTP yanıtından
-sonra arka plan işçisi çalışmaz. AdForge ise her video için 2+ dk arka plan polling,
-yerel JSON kayıt, dosya yükleme ve yanıt sonrası işçi gerektirir. Bunlar Vercel'de kırılır.
+## Why the full application is not serverless
 
-## 1) Landing → Vercel (statik)
-1. https://vercel.com → **Add New → Project**
-2. GitHub'dan **`adforge`** reposunu **Import** et.
-3. Vercel `vercel.json`'u görür → **Output Directory: `public`**, build yok. **Deploy**.
-4. `https://adforge-xxx.vercel.app` adresinde landing yayında.
+Video generation requires long-running polling, local files, background work after HTTP responses, and resumable job state. A short-lived serverless function cannot reliably provide those guarantees.
 
-> Not: Bu statik dağıtımda `/app/` arayüzü açılır ama API'si olmadığından üretim yapmaz.
-> Landing'in "Uygulamayı aç" butonunu, uygulamanın gerçek adresine (Railway URL'i veya
-> demo sırasında lokal `http://localhost:3000/app/`) yönlendir.
+## Static landing page
 
-## 2) Uygulama → Railway (tam çalışır, online)
-1. https://railway.app → **New Project → Deploy from GitHub repo** → `adforge`
-2. Start command: `npm start`
-3. **Variables**: `FAL_KEY=<anahtarın>` (ve istersen `OPENAI_API_KEY`)
-4. Deploy → verilen URL `/app/` üzerinden tam çalışır.
-> Kalıcı `data/` için Railway **Volume** ekle (yoksa restart'ta kampanya geçmişi sıfırlanır;
-> üretim devam mantığı yine de yarım işleri kurtarır).
+1. Import the repository into Vercel.
+2. Keep the framework preset as `Other`.
+3. Use `public` as the output directory.
+4. Point the landing-page application button to the Railway/Render URL or the local demo URL.
 
-## 3) Demo için en pratik (yarın)
-- Landing → Vercel (public link).
-- Uygulama → **lokal** (`npm start`, `http://localhost:3000/app/`) — gerçek videolar burada hazır.
+## Full application on Railway or Render
+
+1. Import the GitHub repository.
+2. Use `npm start` as the start command.
+3. Add `FAL_KEY` and, optionally, `OPENAI_API_KEY`.
+4. Attach persistent storage for `data/` so campaign history survives restarts.
+5. Open the deployed `/app/` path.
+
+Before exposing the application publicly, add authentication, request limits, spending controls, and secure persistent storage.

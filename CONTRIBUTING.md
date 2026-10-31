@@ -1,17 +1,18 @@
-# Katkı rehberi
+# Contributing
 
-AdForge'a yapılan katkılar küçük, doğrulanabilir ve tek amaçlı commit'ler halinde tutulur.
+Keep AdForge contributions small, verifiable, and focused on one purpose.
 
-## Commit ilkeleri
+## Commit policy
 
-- Commit yazarı değişikliği gönderen kişidir.
-- Otomasyon araçları veya kod asistanları commit yazarı ya da ortak yazar olarak eklenmez.
-- Kullanılan bir araç proje davranışını etkiliyorsa ilgili teknik karar kodda veya dokümantasyonda açıkça belirtilir.
-- Commit mesajı yapılan değişikliği ve gerekli olduğunda doğrulama yöntemini anlatır.
+- The person submitting a change remains its commit author.
+- Automation tools and coding assistants are not added as commit authors or co-authors.
+- Document tools that affect runtime behavior in the code or project documentation.
+- Commit messages should describe the change and, when relevant, how it was verified.
 
-## Değişiklik kontrolü
+## Before submitting
 
-1. İlgili akışı yerel olarak çalıştırın.
-2. Yeni ortam değişkenlerini `.env.example` içinde belgeleyin.
-3. API anahtarı, kişisel veri veya üretilmiş medya dosyalarını commit etmeyin.
-4. Dokümantasyonu davranış değişiklikleriyle birlikte güncelleyin.
+1. Run `npm test`.
+2. Exercise the affected workflow locally.
+3. Document new environment variables in `.env.example`.
+4. Never commit API keys, personal data, generated media, or local output files.
+5. Update the README when behavior changes.
