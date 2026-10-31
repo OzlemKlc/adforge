@@ -71,6 +71,8 @@ Her şey **registry** desenli — yeni özellik = tek dosya/nesne:
 
 ## Önemli notlar
 
+- **AI içerik etiketi:** `faceless` ve `avatar` motorlarında her videonun sol üst köşesine, videonun tamamı boyunca "Yapay zeka ile üretilmiştir" (EN: "AI-generated") basılır. `AI_DISCLOSURE` ile metin değiştirilebilir; `off` kapatır (kapatmak önerilmez, yayın kurallarını kontrol et). **`veo` motorunda** altyazı fal.ai tarafında üretildiği için etiket otomatik basılmaz; yayından önce platformun AI içerik işaretini kullan ya da etiketi kurguda ekle.
+
 - **Doğrulama:** fal endpoint ID/fiyatları 2026-05'te doğrulandı; fal revize edebilir. İlk gerçek çalıştırmada bir varyant üretip doğrula (`lib/models.js` tek değişiklik noktası).
 - **Maliyet onayı:** Üretim öncesi canlı maliyet gösterilir ve onay istenir.
 - **Hata modları:** 422 (prompt reddedildi, para kesilmez) ve 500 (video üretildi ama çekilemedi) varyant bazında yakalanır; diğer varyantlar etkilenmez.
