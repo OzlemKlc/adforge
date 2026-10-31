@@ -145,3 +145,28 @@ button.secondary:hover { border-color: var(--accent); background: rgba(255,138,6
 
 footer { padding: 16px 26px; text-align: center; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); margin-top: 20px; }
 @media (max-width: 980px) { main { grid-template-columns: 1fr; } }
+
+/* --- arastirma + ogrenme dongusu --- */
+.research-preview { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
+.achip { display: inline-block; white-space: nowrap; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: rgba(255,138,61,.12); color: var(--accent-2); border: 1px solid rgba(255,138,61,.35); }
+.research-sum { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; margin: 0 0 10px; }
+.vtag.research { color: var(--accent-2); border-color: rgba(255,138,61,.35); }
+.vreal { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+.learning { margin: 12px 0 4px; padding: 10px 12px; border-radius: 10px; font-size: 13px; border: 1px solid var(--border); }
+.learning.match { border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.07); }
+.learning.miss { border-color: rgba(255,138,61,.45); background: rgba(255,138,61,.07); }
+.learning .lm { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.results { margin-top: 12px; }
+.results summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+.rtable { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+.rtable th { text-align: left; color: var(--muted); font-weight: 600; padding: 4px; }
+.rtable td { padding: 3px 4px; }
+.rtable td:first-child { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rtable input { width: 100%; min-width: 64px; }
+@media (max-width: 640px) { .rtable td:first-child { max-width: 90px; } }
+.rtable input[type=number] { background: var(--panel-2); color: var(--text, #e8eaf0); border: 1px solid var(--border); border-radius: 6px; padding: 5px 6px; font: inherit; }
+.rtable input[type=number]:focus { outline: none; border-color: var(--accent); }
+.rtable .rav { color: var(--muted); font-size: 10.5px; }
+.results summary .hint { display: inline; }
+.results { overflow-x: auto; }
+@media (max-width: 640px) { .rtable input[type=number] { min-width: 52px; padding: 4px; } }
