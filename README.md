@@ -29,7 +29,7 @@ Sıradan video araçlarından farkı tek varlık değil, A/B testi için onlarca
              yerel: edge-tts + ffmpeg zoompan + .ass burn   fal: Veo 3.1 / Seedance
 4) SUBTITLE  fal yolu: auto-subtitle. Yerel yol: altyazı 3. aşamada gömülür, atlanır.
 5) SCORE     her varyant → 0-100 skor + sıralama + kazanan
-             (ANTHROPIC_API_KEY varsa LLM, yoksa kural tabanlı yerel skorer)
+             (OPENAI_API_KEY varsa LLM, yoksa kural tabanlı yerel skorer)
 ```
 
 Varsayılan: **5 hook × 2 avatar = 10 varyant.** (v1; formdan ayarlanabilir)
@@ -38,7 +38,7 @@ Varsayılan: **5 hook × 2 avatar = 10 varyant.** (v1; formdan ayarlanabilir)
 
 1. `npm install`
 2. `npm start` → <http://localhost:3000> — **anahtar olmadan üretim yapar** (yerel motor).
-3. (Opsiyonel) `.env.example` → `.env` kopyala: `FAL_KEY` (veo motoru), `ANTHROPIC_API_KEY` (LLM hook/skor), TTS ses/Piper ayarları.
+3. (Opsiyonel) `.env.example` → `.env` kopyala: `FAL_KEY` (veo motoru), `OPENAI_API_KEY` (LLM hook/skor), TTS ses/Piper ayarları.
 
 > **OneDrive notu:** Proje OneDrive altındaysa `data/` klasörünü "Bu cihazda her zaman tut" yap; render sırasında eşitleme kilidi yaşarsan `KEEP_TEMP=0` kalsın ve `data/renders`'ı OneDrive eşitlemesinden hariç tutmayı düşün.
 

@@ -25,7 +25,7 @@ yerel JSON kayıt, dosya yükleme ve yanıt sonrası işçi gerektirir. Bunlar V
 ## 2) Uygulama → Railway (tam çalışır, online)
 1. https://railway.app → **New Project → Deploy from GitHub repo** → `adforge`
 2. Start command: `npm start`
-3. **Variables**: `FAL_KEY=<anahtarın>` (ve istersen `ANTHROPIC_API_KEY`)
+3. **Variables**: `FAL_KEY=<anahtarın>` (ve istersen `OPENAI_API_KEY`)
 4. Deploy → verilen URL `/app/` üzerinden tam çalışır.
 > Kalıcı `data/` için Railway **Volume** ekle (yoksa restart'ta kampanya geçmişi sıfırlanır;
 > üretim devam mantığı yine de yarım işleri kurtarır).

@@ -235,6 +235,6 @@ function clampInt(v, lo, hi, def) {
 
 app.listen(PORT, () => {
   console.log(`\n  AdForge → http://localhost:${PORT}`);
-  console.log(`  Motor: ${DEFAULT_ENGINE} (yerel, ücretsiz)   fal.ai: ${FAL_KEY ? 'bağlı ✓ (opsiyonel)' : 'yok (opsiyonel)'}   LLM (hook/skor): ${llmAvailable() ? 'açık (Anthropic)' : 'şablon/kural modu'}\n`);
+  console.log(`  Motor: ${DEFAULT_ENGINE} (yerel, ücretsiz)   fal.ai: ${FAL_KEY ? 'bağlı ✓ (opsiyonel)' : 'yok (opsiyonel)'}   LLM (hook/skor): ${llmAvailable() ? 'açık (OpenAI)' : 'şablon/kural modu'}\n`);
   pipeline.resumePending();
 });
