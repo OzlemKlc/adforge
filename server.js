@@ -30,6 +30,8 @@ const { llmAvailable } = require('./lib/llm');
 const { ttsInfo } = require('./lib/tts');
 const pipeline = require('./lib/pipeline');
 const demo = require('./lib/demo');
+const { analyzeResearch } = require('./lib/research');
+const { angleLearnings } = require('./lib/learnings');
 
 const app = express();
 app.use(express.json({ limit: '4mb' }));
@@ -154,6 +156,10 @@ app.post('/api/campaigns', (req, res) => {
       });
     }
 
+    // Rakip arastirmasi (opsiyonel): duz metin ya da Winning Product Finder JSON'u.
+    // Ham metin saklanmaz; yalnizca cikarilan aci ozeti ve kisa referans acilislari.
+    const research = b.research ? analyzeResearch(b.research) : null;
+
     const campaign = store.createCampaign({
       brand: { name: (b.brandName || '').trim(), language: b.language === 'en' ? 'en' : 'tr' },
       brief: { product, benefit: (b.benefit || '').trim(), audience: (b.audience || '').trim(), tone: (b.tone || '').trim() },
@@ -161,7 +167,11 @@ app.post('/api/campaigns', (req, res) => {
       productImageUrl: b.productImageUrl || null,
       cost: { estimated: cost.total, actual: 0 },
     });
-    store.updateCampaign(campaign.id, { scorer: b.scorer || DEFAULT_SCORER, costDetail: cost });
+    store.updateCampaign(campaign.id, {
+      scorer: b.scorer || DEFAULT_SCORER,
+      costDetail: cost,
+      research: research && research.total ? research : null,
+    });
 
     pipeline.produceCampaign(campaign.id); // arka planda
     res.json({ campaignId: campaign.id, cost });
@@ -212,6 +222,33 @@ app.post('/api/campaigns/:id/variants/:vid/retry', (req, res) => {
   if (!v) return res.status(404).json({ error: 'Varyant bulunamadı' });
   pipeline.retryVariant(req.params.id, req.params.vid);
   res.json({ ok: true });
+});
+
+// --- arastirma onizleme: kampanya acmadan rakip metinlerinin aci ozeti ---
+app.post('/api/research/preview', (req, res) => {
+  try {
+    res.json(analyzeResearch((req.body || {}).research));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// --- gercek reklam sonuclari (ogrenme dongusu) ---
+// Body: { results: [{ variantId, impressions, clicks, conversions, spend }] }
+app.post('/api/campaigns/:id/results', (req, res) => {
+  if (!validIds(req.params.id)) return res.status(400).json({ error: 'Geçersiz kampanya kimliği' });
+  const results = Array.isArray(req.body?.results) ? req.body.results.slice(0, 200) : [];
+  if (!results.every((r) => r && validIds(r.variantId))) {
+    return res.status(400).json({ error: 'Geçersiz varyant kimliği' });
+  }
+  const out = pipeline.recordResults(req.params.id, results);
+  if (!out) return res.status(404).json({ error: 'Kampanya bulunamadı' });
+  res.json(out);
+});
+
+// --- markanin tum kampanyalarindan ogrenilen aci performansi ---
+app.get('/api/learnings', (req, res) => {
+  res.json(angleLearnings(store.listCampaigns()));
 });
 
 // kampanya liste ozeti (varyant detaylarini gondermeden)
