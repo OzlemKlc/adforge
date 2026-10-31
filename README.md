@@ -1,5 +1,7 @@
 # AdForge — UGC reklam varyant motoru
 
+> Aktif olarak [OpenAI Codex](https://openai.com/codex/) ile geliştiriliyor ve bakımı yapılıyor.
+
 DTC/e-ticaret markaları için: **tek ürün fotoğrafı + kısa brief → 10 UGC reklam varyantı + performans raporu.**
 
 Sıradan video araçlarından farkı tek varlık değil, A/B testi için onlarca varyant üretmesi ve hangisinin dönüşeceğine dair tahmini skor sunmasıdır. **Varsayılan motor tamamen yerel ve ücretsizdir** (API anahtarı gerektirmez); istenirse fal.ai motorları opsiyonel olarak açılır.
